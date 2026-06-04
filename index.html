@@ -28,7 +28,9 @@ body {
 #header {
   background: var(--card); border-bottom: 1px solid var(--border);
   padding: 14px 18px 12px; position: sticky; top: 0; z-index: 100;
+  transition: all 0.3s;
 }
+#header.hidden { display: none; }
 #header-top { display: flex; justify-content: space-between; align-items: center; }
 #app-title { font-size: 18px; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
 #header-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
@@ -37,7 +39,9 @@ body {
   display: flex; background: var(--card);
   border-bottom: 1px solid var(--border);
   position: sticky; top: 57px; z-index: 99;
+  transition: all 0.3s;
 }
+#tabbar.hidden { display: none; }
 .tab-btn {
   flex: 1; padding: 12px 2px; border: none; background: transparent;
   color: var(--muted); font-weight: 400; font-size: 13px;
@@ -45,24 +49,38 @@ body {
   transition: all 0.2s; font-family: inherit;
 }
 .tab-btn.active { color: var(--accent); font-weight: 700; border-bottom-color: var(--accent); }
+/* 뒤로가기 바 */
+#back-bar {
+  display: none; background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 16px; position: sticky; top: 0; z-index: 100;
+  align-items: center; gap: 12px;
+}
+#back-bar.show { display: flex; }
+#back-btn {
+  background: transparent; border: none; color: var(--accent);
+  font-size: 16px; font-weight: 700; cursor: pointer;
+  font-family: inherit; padding: 4px 8px;
+}
+#back-title { font-size: 14px; font-weight: 700; color: var(--text); }
 .body { padding: 16px; padding-bottom: 32px; }
 .card {
   background: var(--card); border: 1px solid var(--border);
-  border-radius: 14px; padding: 16px; margin-bottom: 12px;
+  border-radius: 14px; padding: 14px; margin-bottom: 10px;
 }
 .label {
-  font-size: 11px; color: var(--muted); text-transform: uppercase;
-  letter-spacing: 1.5px; margin-bottom: 5px; font-weight: 600;
+  font-size: 14px; color: var(--muted);
+  margin-bottom: 6px; font-weight: 600;
 }
 input, textarea {
   width: 100%; background: var(--bg); border: 1px solid var(--border);
-  border-radius: 10px; color: var(--text); font-size: 16px;
+  border-radius: 10px; color: var(--text); font-size: 20px;
   padding: 12px 14px; outline: none; margin-bottom: 10px;
   font-family: inherit; transition: border 0.2s;
 }
 input:focus, textarea:focus { border-color: var(--accent); }
 .btn {
-  border-radius: 10px; padding: 12px 16px; font-size: 14px;
+  border-radius: 10px; padding: 12px 16px; font-size: 16px;
   font-weight: 700; cursor: pointer; border: 1px solid;
   font-family: inherit; transition: all 0.15s;
 }
@@ -87,7 +105,7 @@ input:focus, textarea:focus { border-color: var(--accent); }
   border-radius: 12px; padding: 14px; text-align: center;
 }
 .stat-val { font-size: 24px; font-weight: 800; }
-.stat-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.stat-label { font-size: 13px; color: var(--muted); margin-top: 2px; }
 .progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
 .progress-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--green), var(--accent)); transition: width 0.4s; }
 #modal-overlay {
@@ -106,47 +124,89 @@ input:focus, textarea:focus { border-color: var(--accent); }
   animation: spin 0.8s linear infinite; margin: 0 auto 14px;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-.loading-wrap { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 14px; }
+.loading-wrap { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 16px; }
 .feedback-box { border-radius: 12px; padding: 16px; margin-top: 14px; }
 .feedback-correct { background: var(--green-g); border: 1px solid var(--green); }
 .feedback-wrong { background: var(--red-g); border: 1px solid var(--red); }
-/* 선택 입력 접기 */
 .optional-toggle {
-  font-size: 13px; color: var(--accent); cursor: pointer;
+  font-size: 15px; color: var(--accent); cursor: pointer;
   padding: 8px 0; display: flex; align-items: center; gap: 6px;
   margin-bottom: 4px;
 }
-/* 시험 문장 */
 #q-sentence {
-  font-size: 20px; line-height: 2.4; margin-bottom: 10px;
+  font-size: 24px; line-height: 1.3; margin-bottom: 10px;
   color: var(--text); word-break: break-word;
 }
-/* 빈칸 인라인 입력 */
+#q-translation {
+  font-size: 22px; color: var(--muted);
+  margin-bottom: 14px; line-height: 1.3;
+}
 .blank-input-inline {
-  display: inline-block;
-  background: transparent;
-  border: none;
-  color: var(--yellow);
-  font-size: 18px;
-  font-weight: 700;
-  font-family: inherit;
-  outline: none;
-  padding: 0 2px;
-  margin: 0 2px;
-  text-align: center;
-  vertical-align: middle;
+  display: inline-block; background: transparent; border: none;
+  color: var(--yellow); font-size: 22px; font-weight: 700;
+  font-family: inherit; outline: none; padding: 0 2px;
+  margin: 0 2px; text-align: center; vertical-align: middle;
   letter-spacing: 2px;
 }
-.blank-input-inline:focus {
-  color: var(--accent);
+.blank-input-inline:focus { color: var(--accent); }
+.blank-input-inline.hint-used { color: var(--red); }
+/* 로그인 화면 */
+#login-screen {
+  display: none; position: fixed; inset: 0;
+  background: var(--bg); z-index: 200;
+  padding: 40px 20px; overflow-y: auto;
 }
-.blank-input-inline.hint-used {
-  color: var(--red);
-}
+#login-screen.show { display: block; }
 </style>
 </head>
 <body>
 
+<!-- 로그인 화면 -->
+<div id="login-screen">
+  <div style="text-align:center;margin-bottom:32px">
+    <div style="font-size:48px;margin-bottom:12px">📚</div>
+    <div style="font-size:24px;font-weight:800;color:var(--accent)">영어표현 학습</div>
+  </div>
+
+  <!-- 기존 사용자 로그인 -->
+  <div class="card" id="login-card">
+    <div style="font-size:18px;font-weight:700;color:var(--yellow);margin-bottom:16px">🔐 로그인</div>
+    <div class="label">이름 선택</div>
+    <select id="login-name-select" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:18px;padding:12px 14px;outline:none;font-family:inherit;margin-bottom:10px">
+      <option value="">이름을 선택하세요...</option>
+    </select>
+    <div class="label">비밀번호</div>
+    <input id="login-pw" type="password" placeholder="비밀번호 입력" style="font-size:20px"
+      onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn btn-accent btn-full" onclick="doLogin()">로그인</button>
+    <div id="login-error" style="color:var(--red);font-size:14px;margin-top:8px;display:none">
+      이름 또는 비밀번호가 틀렸습니다.
+    </div>
+    <div style="text-align:center;margin-top:16px">
+      <span style="font-size:14px;color:var(--muted)">처음 사용하시나요? </span>
+      <button onclick="showRegister()" style="background:transparent;border:none;color:var(--accent);font-size:14px;cursor:pointer;font-family:inherit;font-weight:700">새 사용자 등록</button>
+    </div>
+  </div>
+
+  <!-- 신규 등록 -->
+  <div class="card" id="register-card" style="display:none">
+    <div style="font-size:18px;font-weight:700;color:var(--green);margin-bottom:16px">✨ 새 사용자 등록</div>
+    <div class="label">이름</div>
+    <input id="reg-name" placeholder="이름 입력" autocapitalize="words">
+    <div class="label">비밀번호</div>
+    <input id="reg-pw" type="password" placeholder="비밀번호 설정">
+    <div class="label">비밀번호 확인</div>
+    <input id="reg-pw2" type="password" placeholder="비밀번호 재입력"
+      onkeydown="if(event.key==='Enter')doRegister()">
+    <button class="btn btn-green btn-full" onclick="doRegister()">등록</button>
+    <div id="reg-error" style="color:var(--red);font-size:14px;margin-top:8px;display:none"></div>
+    <div style="text-align:center;margin-top:16px">
+      <button onclick="showLogin()" style="background:transparent;border:none;color:var(--muted);font-size:14px;cursor:pointer;font-family:inherit">← 로그인으로 돌아가기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 헤더 -->
 <div id="header">
   <div id="header-top">
     <div>
@@ -157,26 +217,33 @@ input:focus, textarea:focus { border-color: var(--accent); }
   </div>
 </div>
 
+<!-- 탭바 -->
 <div id="tabbar">
-  <button class="tab-btn" onclick="switchTab('input')">입력</button>
-  <button class="tab-btn active" onclick="switchTab('exam')">시험</button>
-  <button class="tab-btn" onclick="switchTab('vocab')">단어장</button>
-  <button class="tab-btn" onclick="switchTab('stats')">통계</button>
-  <button class="tab-btn" onclick="switchTab('settings')">설정</button>
+  <button class="tab-btn" onclick="selectTab('input')">입력</button>
+  <button class="tab-btn active" onclick="selectTab('exam')">시험</button>
+  <button class="tab-btn" onclick="selectTab('vocab')">단어장</button>
+  <button class="tab-btn" onclick="selectTab('stats')">통계</button>
+  <button class="tab-btn" id="admin-tab-btn" onclick="selectTab('admin')" style="display:none">수정</button>
+</div>
+
+<!-- 뒤로가기 바 -->
+<div id="back-bar">
+  <button id="back-btn" onclick="goHome()">← 홈</button>
+  <span id="back-title"></span>
 </div>
 
 <!-- 중복 모달 -->
 <div id="modal-overlay">
   <div id="modal-box">
-    <div style="font-size:16px;font-weight:700;color:var(--yellow);margin-bottom:4px">⚠️ 이미 등록된 표현입니다</div>
-    <div id="modal-date" style="font-size:13px;color:var(--muted);margin-bottom:14px"></div>
+    <div style="font-size:18px;font-weight:700;color:var(--yellow);margin-bottom:4px">⚠️ 이미 등록된 표현입니다</div>
+    <div id="modal-date" style="font-size:14px;color:var(--muted);margin-bottom:14px"></div>
     <div style="background:var(--bg);border-radius:10px;padding:14px;margin-bottom:10px;border:1px solid var(--border)">
-      <div style="font-size:11px;color:var(--accent);font-weight:700;letter-spacing:1.5px;margin-bottom:6px">📝 영어 예문</div>
-      <div id="modal-ex-en" style="font-size:14px;line-height:1.7"></div>
+      <div style="font-size:12px;color:var(--accent);font-weight:700;letter-spacing:1.5px;margin-bottom:6px">📝 영어 예문</div>
+      <div id="modal-ex-en" style="font-size:16px;line-height:1.6"></div>
     </div>
     <div style="background:var(--bg);border-radius:10px;padding:14px;margin-bottom:18px;border:1px solid var(--border)">
-      <div style="font-size:11px;color:var(--green);font-weight:700;letter-spacing:1.5px;margin-bottom:6px">🇰🇷 한국어 번역</div>
-      <div id="modal-ex-ko" style="font-size:14px;line-height:1.7"></div>
+      <div style="font-size:12px;color:var(--green);font-weight:700;letter-spacing:1.5px;margin-bottom:6px">🇰🇷 한국어 번역</div>
+      <div id="modal-ex-ko" style="font-size:16px;line-height:1.6"></div>
     </div>
     <div class="row">
       <button class="btn btn-yellow flex1" onclick="modalConfirm()">추가 등록</button>
@@ -188,52 +255,44 @@ input:focus, textarea:focus { border-color: var(--accent); }
 <!-- ── 탭: 입력 ── -->
 <div id="tab-input" class="tab-section body">
   <div class="card">
-    <div style="font-size:15px;font-weight:700;color:var(--yellow);margin-bottom:14px">✏️ 새 표현 등록</div>
-
-    <!-- 필수 항목 - 라벨과 입력창 한 줄 -->
+    <div style="font-size:18px;font-weight:700;color:var(--yellow);margin-bottom:14px">✏️ 새 표현 등록</div>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-      <div style="font-size:13px;color:var(--muted);min-width:60px;font-weight:600">영어표현*</div>
+      <div style="font-size:16px;color:var(--muted);min-width:60px;font-weight:600">영어*</div>
       <input id="f-en" placeholder="e.g. run short of"
         autocapitalize="none" autocorrect="off" spellcheck="false"
-        style="margin-bottom:0;flex:1"
-        onblur="checkDuplicate()">
+        style="margin-bottom:0;flex:1" onblur="checkDuplicate()">
     </div>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-      <div style="font-size:13px;color:var(--muted);min-width:60px;font-weight:600">우리말*</div>
+      <div style="font-size:16px;color:var(--muted);min-width:60px;font-weight:600">우리말*</div>
       <input id="f-ko" placeholder="부족해지다" style="margin-bottom:0;flex:1">
     </div>
     <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px">
-      <div style="font-size:13px;color:var(--muted);min-width:60px;font-weight:600;padding-top:12px">예문*</div>
+      <div style="font-size:16px;color:var(--muted);min-width:60px;font-weight:600;padding-top:14px">예문*</div>
       <textarea id="f-ex-en" placeholder="We are running short of time."
         rows="2" style="resize:none;margin-bottom:0;flex:1"></textarea>
     </div>
     <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:14px">
-      <div style="font-size:13px;color:var(--muted);min-width:60px;font-weight:600;padding-top:12px">번역*</div>
+      <div style="font-size:16px;color:var(--muted);min-width:60px;font-weight:600;padding-top:14px">번역*</div>
       <textarea id="f-ex-ko" placeholder="우리는 시간이 부족해지고 있다."
         rows="2" style="resize:none;margin-bottom:0;flex:1"></textarea>
     </div>
-
-    <!-- 선택 입력 - 리스트 선택 방식 -->
     <div id="optional-rows"></div>
-    <div id="optional-selector">
-      <select id="optional-select" onchange="addOptionalRow()"
-        style="width:100%;background:var(--bg);border:1px solid var(--border);
-        border-radius:10px;color:var(--text);font-size:14px;
-        padding:12px 14px;outline:none;font-family:inherit;margin-bottom:10px">
-        <option value="">+ 추가 입력 선택...</option>
-        <option value="done">✅ 완료 (저장)</option>
-        <option value="pr">발음</option>
-        <option value="syn">동의어</option>
-        <option value="ant">반의어</option>
-        <option value="related">관련표현</option>
-        <option value="src">출처</option>
-        <option value="nar">나레이션</option>
-      </select>
-    </div>
-
-    <button id="save-btn" class="btn btn-accent btn-full" onclick="trySave()" style="margin-top:4px">저장</button>
+    <select id="optional-select" onchange="addOptionalRow()"
+      style="width:100%;background:var(--bg);border:1px solid var(--border);
+      border-radius:10px;color:var(--text);font-size:16px;
+      padding:12px 14px;outline:none;font-family:inherit;margin-bottom:10px">
+      <option value="">+ 추가 입력 선택...</option>
+      <option value="done">✅ 완료 (저장)</option>
+      <option value="pr">발음</option>
+      <option value="syn">동의어</option>
+      <option value="ant">반의어</option>
+      <option value="related">관련표현</option>
+      <option value="src">출처</option>
+      <option value="nar">나레이션</option>
+    </select>
+    <button id="save-btn" class="btn btn-accent btn-full" onclick="trySave()">저장</button>
   </div>
-  <div id="my-word-count" style="font-size:13px;color:var(--muted);margin-bottom:8px"></div>
+  <div id="my-word-count" style="font-size:14px;color:var(--muted);margin-bottom:8px"></div>
   <div id="word-list"></div>
 </div>
 
@@ -241,7 +300,7 @@ input:focus, textarea:focus { border-color: var(--accent); }
 <div id="tab-exam" class="tab-section active body">
   <div id="exam-ready">
     <div class="card">
-      <div style="font-size:15px;font-weight:700;color:var(--yellow);margin-bottom:12px">🎯 시험 시작</div>
+      <div style="font-size:18px;font-weight:700;color:var(--yellow);margin-bottom:12px">🎯 시험 시작</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
         <div class="stat-card">
           <div class="stat-val" id="pool-count" style="color:var(--accent)">0</div>
@@ -253,8 +312,8 @@ input:focus, textarea:focus { border-color: var(--accent); }
         </div>
       </div>
       <div class="card" style="background:var(--bg);margin-bottom:12px;padding:12px">
-        <div style="font-size:12px;color:var(--muted);margin-bottom:5px">출제 알고리즘</div>
-        <div id="algo-desc" style="font-size:13px;line-height:1.8;color:var(--text)"></div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:5px">출제 알고리즘</div>
+        <div id="algo-desc" style="font-size:15px;line-height:1.8;color:var(--text)"></div>
       </div>
       <button class="btn btn-yellow btn-full" onclick="startExam()">시험 시작</button>
     </div>
@@ -262,15 +321,15 @@ input:focus, textarea:focus { border-color: var(--accent); }
 
   <div id="exam-question" style="display:none">
     <div style="display:flex;justify-content:space-between;margin-bottom:12px">
-      <span id="q-count" style="font-size:13px;color:var(--muted)"></span>
-      <span id="q-score" style="font-size:14px;font-weight:700"></span>
+      <span id="q-count" style="font-size:15px;color:var(--muted)"></span>
+      <span id="q-score" style="font-size:16px;font-weight:700"></span>
     </div>
-    <div class="card">
+    <div class="card" style="padding:12px">
       <div id="q-sentence"></div>
-      <div id="q-translation" style="font-size:18px;color:var(--muted);margin-bottom:14px;line-height:1.7"></div>
+      <div id="q-translation"></div>
       <div id="answer-area">
         <div class="row" style="margin-top:8px">
-          <button class="btn btn-muted" style="font-size:13px" onclick="showHint()">💡 힌트</button>
+          <button class="btn btn-muted" style="font-size:15px" onclick="showHint()">💡 힌트</button>
           <button class="btn btn-yellow flex1" onclick="checkAnswer()">정답 확인</button>
         </div>
       </div>
@@ -282,7 +341,7 @@ input:focus, textarea:focus { border-color: var(--accent); }
     <div class="card" style="text-align:center;padding:36px 20px">
       <div id="result-emoji" style="font-size:56px;margin-bottom:8px"></div>
       <div id="result-pct" style="font-size:44px;font-weight:900;letter-spacing:-1px"></div>
-      <div id="result-detail" style="color:var(--muted);font-size:14px;margin-top:8px"></div>
+      <div id="result-detail" style="color:var(--muted);font-size:16px;margin-top:8px"></div>
       <div class="row" style="margin-top:24px">
         <button class="btn btn-muted flex1" onclick="showExamReady()">← 설정</button>
         <button class="btn btn-yellow flex1" onclick="startExam()">재시험</button>
@@ -294,24 +353,24 @@ input:focus, textarea:focus { border-color: var(--accent); }
 <!-- ── 탭: 단어장 ── -->
 <div id="tab-vocab" class="tab-section body">
   <input id="search-input" placeholder="🔍 검색 (영어/한국어)"
-    style="margin-bottom:10px;font-size:16px" oninput="filterVocab()">
-  <div id="vocab-nav" style="text-align:center;font-size:13px;color:var(--muted);margin-bottom:10px"></div>
+    style="margin-bottom:10px" oninput="filterVocab()">
+  <div id="vocab-nav" style="text-align:center;font-size:14px;color:var(--muted);margin-bottom:10px"></div>
   <div id="flashcard" onclick="flipCard()" style="
     border-radius:18px;padding:28px 20px;text-align:center;
     cursor:pointer;min-height:220px;margin-bottom:14px;
     transition:all 0.3s;border:2px solid var(--border);background:var(--card)">
     <div id="card-front">
-      <div id="card-en" style="font-size:26px;font-weight:800;margin-bottom:8px"></div>
-      <div id="card-pr" style="font-size:14px;color:var(--muted)"></div>
-      <div style="font-size:12px;color:var(--dim);margin-top:24px">탭하여 뜻 보기</div>
+      <div id="card-en" style="font-size:30px;font-weight:800;margin-bottom:8px"></div>
+      <div id="card-pr" style="font-size:16px;color:var(--muted)"></div>
+      <div style="font-size:14px;color:var(--dim);margin-top:24px">탭하여 뜻 보기</div>
     </div>
     <div id="card-back" style="display:none">
-      <div id="card-ko" style="font-size:18px;font-weight:700;color:var(--accent);margin-bottom:12px"></div>
-      <div id="card-ex-en" style="font-size:14px;line-height:1.7;margin-bottom:6px"></div>
-      <div id="card-ex-ko" style="font-size:13px;color:var(--muted);line-height:1.7"></div>
-      <div id="card-nar" style="font-size:12px;color:var(--yellow);margin-top:8px;font-style:italic"></div>
+      <div id="card-ko" style="font-size:22px;font-weight:700;color:var(--accent);margin-bottom:12px"></div>
+      <div id="card-ex-en" style="font-size:18px;line-height:1.5;margin-bottom:6px"></div>
+      <div id="card-ex-ko" style="font-size:16px;color:var(--muted);line-height:1.5"></div>
+      <div id="card-nar" style="font-size:14px;color:var(--yellow);margin-top:8px;font-style:italic"></div>
       <div id="card-tags" style="margin-top:10px"></div>
-      <div id="card-src" style="margin-top:8px;font-size:12px;color:var(--dim)"></div>
+      <div id="card-src" style="margin-top:8px;font-size:13px;color:var(--dim)"></div>
     </div>
   </div>
   <div class="row" style="margin-bottom:14px">
@@ -320,9 +379,9 @@ input:focus, textarea:focus { border-color: var(--accent); }
   </div>
   <div class="card" style="text-align:center">
     <div style="display:flex;justify-content:space-around">
-      <div><div id="v-cc" style="font-size:22px;font-weight:800;color:var(--green)">0</div><div style="font-size:12px;color:var(--muted)">정답</div></div>
-      <div><div id="v-wc" style="font-size:22px;font-weight:800;color:var(--red)">0</div><div style="font-size:12px;color:var(--muted)">오답</div></div>
-      <div><div id="v-pct" style="font-size:22px;font-weight:800;color:var(--yellow)">-</div><div style="font-size:12px;color:var(--muted)">정답률</div></div>
+      <div><div id="v-cc" style="font-size:24px;font-weight:800;color:var(--green)">0</div><div style="font-size:13px;color:var(--muted)">정답</div></div>
+      <div><div id="v-wc" style="font-size:24px;font-weight:800;color:var(--red)">0</div><div style="font-size:13px;color:var(--muted)">오답</div></div>
+      <div><div id="v-pct" style="font-size:24px;font-weight:800;color:var(--yellow)">-</div><div style="font-size:13px;color:var(--muted)">정답률</div></div>
     </div>
   </div>
 </div>
@@ -334,21 +393,64 @@ input:focus, textarea:focus { border-color: var(--accent); }
     <div class="label">전체 정답률</div>
     <div style="display:flex;align-items:center;gap:12px">
       <div class="progress-bar flex1"><div class="progress-fill" id="overall-bar" style="width:0%"></div></div>
-      <span id="overall-pct" style="font-size:15px;font-weight:800;color:var(--green);min-width:44px">-</span>
+      <span id="overall-pct" style="font-size:16px;font-weight:800;color:var(--green);min-width:44px">-</span>
     </div>
   </div>
-  <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:8px">취약 단어 TOP 20</div>
+  <div style="font-size:14px;font-weight:700;color:var(--muted);margin-bottom:8px">취약 단어 TOP 20</div>
   <div id="stats-list"></div>
 </div>
 
-<!-- ── 탭: 설정 ── -->
+<!-- ── 탭: 수정 (운영자 전용) ── -->
+<div id="tab-admin" class="tab-section body">
+  <div class="card">
+    <div style="font-size:18px;font-weight:700;color:var(--accent);margin-bottom:14px">🔧 문장 수정</div>
+    <div class="label">검색어 입력 (여러 단어 권장)</div>
+    <input id="admin-search" placeholder="예: searching for food in"
+      autocapitalize="none" autocorrect="off" spellcheck="false">
+    <button class="btn btn-accent btn-full" onclick="adminSearch()">검색</button>
+  </div>
+
+  <!-- 검색 결과 -->
+  <div id="admin-results" style="display:none">
+    <div style="font-size:14px;color:var(--muted);margin-bottom:8px">검색 결과 (클릭하여 선택)</div>
+    <div id="admin-result-list"></div>
+  </div>
+
+  <!-- 수정 화면 -->
+  <div id="admin-edit" style="display:none">
+    <div class="card">
+      <div style="font-size:16px;font-weight:700;color:var(--muted);margin-bottom:8px">수정 전 예문</div>
+      <div id="edit-orig-en" style="font-size:16px;line-height:1.5;color:var(--text);background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px"></div>
+      <div class="label">수정 후 예문</div>
+      <textarea id="edit-new-en" rows="3" style="resize:none;font-size:18px"></textarea>
+
+      <div style="font-size:16px;font-weight:700;color:var(--muted);margin-bottom:8px;margin-top:4px">수정 전 번역</div>
+      <div id="edit-orig-ko" style="font-size:16px;line-height:1.5;color:var(--text);background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px"></div>
+      <div class="label">수정 후 번역</div>
+      <textarea id="edit-new-ko" rows="3" style="resize:none;font-size:18px"></textarea>
+
+      <div class="row" style="margin-top:8px">
+        <button class="btn btn-muted flex1" onclick="cancelEdit()">취소</button>
+        <button class="btn btn-green flex1" onclick="saveEdit()">저장</button>
+      </div>
+      <div id="edit-status" style="font-size:14px;margin-top:8px;text-align:center"></div>
+    </div>
+  </div>
+
+  <!-- 로그아웃 -->
+  <div class="card" style="margin-top:20px">
+    <div style="font-size:16px;font-weight:700;color:var(--muted);margin-bottom:12px">계정</div>
+    <div style="font-size:15px;color:var(--text);margin-bottom:12px">
+      현재 사용자: <span id="current-user-display" style="color:var(--accent);font-weight:700"></span>
+    </div>
+    <button class="btn btn-red btn-full" onclick="doLogout()">로그아웃</button>
+  </div>
+</div>
+
+<!-- ── 탭: 설정 (일반 사용자) ── -->
 <div id="tab-settings" class="tab-section body">
   <div class="card">
-    <div style="font-size:15px;font-weight:700;color:var(--yellow);margin-bottom:12px">👤 사용자 선택</div>
-    <div id="user-buttons"></div>
-  </div>
-  <div class="card">
-    <div style="font-size:15px;font-weight:700;color:var(--accent);margin-bottom:12px">⚙️ 출제 알고리즘 설정</div>
+    <div style="font-size:18px;font-weight:700;color:var(--accent);margin-bottom:12px">⚙️ 출제 알고리즘 설정</div>
     <div class="label">최근 입력 기간</div>
     <div id="recent-days-btns" class="row" style="margin-bottom:12px;flex-wrap:wrap;gap:8px"></div>
     <div class="label">최근 오답 기간</div>
@@ -356,43 +458,50 @@ input:focus, textarea:focus { border-color: var(--accent); }
     <div class="card" style="background:var(--bg);margin-bottom:12px">
       <div class="label">후보 수 설정</div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <span style="font-size:14px">최근 입력 후보</span>
+        <span style="font-size:16px">최근 입력 후보</span>
         <div class="row" style="align-items:center;gap:14px">
-          <button class="btn btn-muted" style="padding:4px 14px;font-size:18px" onclick="adjustCount('recentInputCount',-1)">−</button>
-          <span id="cnt-recentInputCount" style="font-size:18px;font-weight:700;color:var(--accent);min-width:24px;text-align:center">1</span>
-          <button class="btn btn-muted" style="padding:4px 14px;font-size:18px" onclick="adjustCount('recentInputCount',1)">＋</button>
+          <button class="btn btn-muted" style="padding:4px 14px;font-size:20px" onclick="adjustCount('recentInputCount',-1)">−</button>
+          <span id="cnt-recentInputCount" style="font-size:20px;font-weight:700;color:var(--accent);min-width:24px;text-align:center">1</span>
+          <button class="btn btn-muted" style="padding:4px 14px;font-size:20px" onclick="adjustCount('recentInputCount',1)">＋</button>
         </div>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <span style="font-size:14px">최근 오답 후보</span>
+        <span style="font-size:16px">최근 오답 후보</span>
         <div class="row" style="align-items:center;gap:14px">
-          <button class="btn btn-muted" style="padding:4px 14px;font-size:18px" onclick="adjustCount('recentWrongCount',-1)">−</button>
-          <span id="cnt-recentWrongCount" style="font-size:18px;font-weight:700;color:var(--accent);min-width:24px;text-align:center">2</span>
-          <button class="btn btn-muted" style="padding:4px 14px;font-size:18px" onclick="adjustCount('recentWrongCount',1)">＋</button>
+          <button class="btn btn-muted" style="padding:4px 14px;font-size:20px" onclick="adjustCount('recentWrongCount',-1)">−</button>
+          <span id="cnt-recentWrongCount" style="font-size:20px;font-weight:700;color:var(--accent);min-width:24px;text-align:center">2</span>
+          <button class="btn btn-muted" style="padding:4px 14px;font-size:20px" onclick="adjustCount('recentWrongCount',1)">＋</button>
         </div>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <span style="font-size:14px">전체 풀 후보</span>
+        <span style="font-size:16px">전체 풀 후보</span>
         <div class="row" style="align-items:center;gap:14px">
-          <button class="btn btn-muted" style="padding:4px 14px;font-size:18px" onclick="adjustCount('totalPoolCount',-1)">−</button>
-          <span id="cnt-totalPoolCount" style="font-size:18px;font-weight:700;color:var(--accent);min-width:24px;text-align:center">1</span>
-          <button class="btn btn-muted" style="padding:4px 14px;font-size:18px" onclick="adjustCount('totalPoolCount',1)">＋</button>
+          <button class="btn btn-muted" style="padding:4px 14px;font-size:20px" onclick="adjustCount('totalPoolCount',-1)">−</button>
+          <span id="cnt-totalPoolCount" style="font-size:20px;font-weight:700;color:var(--accent);min-width:24px;text-align:center">1</span>
+          <button class="btn btn-muted" style="padding:4px 14px;font-size:20px" onclick="adjustCount('totalPoolCount',1)">＋</button>
         </div>
       </div>
-      <div style="text-align:right;font-size:13px;color:var(--muted)">
+      <div style="text-align:right;font-size:14px;color:var(--muted)">
         총 후보: <span id="total-candidates" style="color:var(--yellow);font-weight:700">4</span>개
       </div>
     </div>
     <button class="btn btn-green btn-full" onclick="saveSettings()">설정 저장</button>
   </div>
+  <div class="card">
+    <div style="font-size:16px;font-weight:700;color:var(--muted);margin-bottom:12px">계정</div>
+    <div style="font-size:15px;color:var(--text);margin-bottom:12px">
+      현재 사용자: <span id="current-user-display2" style="color:var(--accent);font-weight:700"></span>
+    </div>
+    <button class="btn btn-red btn-full" onclick="doLogout()">로그아웃</button>
+  </div>
 </div>
 
 <script>
 const API = "https://script.google.com/macros/s/AKfycbzdWg-3MSqQX0eRC1aguQLELHlndYvEj7CiWdsew831myxi_g3Tb7rrXExDMXTA27tZ/exec";
+const ADMIN = "강규연"; // 운영자
 
 let words = [], stats = {}, excludedSet = new Set();
-let author = localStorage.getItem('author') || '강규연';
-let users = ['강규연'];
+let author = "", users = [];
 let settings = JSON.parse(localStorage.getItem('settings') || 'null') || {
   recentDays:30, recentWrongDays:30,
   recentInputCount:1, recentWrongCount:2, totalPoolCount:1
@@ -402,18 +511,18 @@ let vocabIdx = 0, vocabFiltered = [], vocabFlipped = false;
 let currentWord = null;
 let blankWords = [], hintUsed = [];
 let pendingForm = null;
+let optionalData = {};
+let editingWord = null;
 
-// 당일 문제 수 관리
-function getTodayCount() {
+// 당일 문제 수
+function getTodayData() {
   const today = new Date().toISOString().slice(0,10);
   const saved = JSON.parse(localStorage.getItem('todayExam') || '{}');
   if (saved.date === today) return saved;
   return {date:today, count:0, words_c:0, words_w:0};
 }
-function saveTodayCount(data) {
-  localStorage.setItem('todayExam', JSON.stringify(data));
-}
-let todayData = getTodayCount();
+function saveTodayData(d) { localStorage.setItem('todayExam', JSON.stringify(d)); }
+let todayData = getTodayData();
 let examCount = todayData.count;
 let examScore = {c: todayData.words_c||0, w: todayData.words_w||0};
 
@@ -429,25 +538,149 @@ function isExcluded(en) {
   return false;
 }
 
+// ── 로그인 ────────────────────────────────────────────────
+async function initLogin() {
+  // 자동 로그인 확인
+  const saved = JSON.parse(localStorage.getItem('loginInfo') || '{}');
+  if (saved.author && saved.pw) {
+    // 서버에서 사용자 목록 로드
+    try {
+      const res = await fetch(`${API}?action=getUsers`);
+      const data = await res.json();
+      if (data.users) users = data.users;
+      // 자동 로그인 검증
+      const valid = await verifyLogin(saved.author, saved.pw);
+      if (valid) {
+        author = saved.author;
+        startApp();
+        return;
+      }
+    } catch(e) {}
+  }
+  // 로그인 화면 표시
+  showLoginScreen();
+}
+
+async function showLoginScreen() {
+  document.getElementById("login-screen").classList.add("show");
+  try {
+    const res = await fetch(`${API}?action=getUsers`);
+    const data = await res.json();
+    if (data.users) {
+      users = data.users;
+      const sel = document.getElementById("login-name-select");
+      sel.innerHTML = '<option value="">이름을 선택하세요...</option>';
+      users.forEach(u => {
+        sel.innerHTML += `<option value="${u}">${u}</option>`;
+      });
+    }
+  } catch(e) {}
+}
+
+async function verifyLogin(name, pw) {
+  try {
+    const res = await fetch(`${API}?action=verifyLogin&name=${encodeURIComponent(name)}&pw=${encodeURIComponent(pw)}`);
+    const data = await res.json();
+    return data.valid;
+  } catch(e) { return false; }
+}
+
+async function doLogin() {
+  const name = document.getElementById("login-name-select").value;
+  const pw = document.getElementById("login-pw").value;
+  if (!name || !pw) { showLoginError("이름과 비밀번호를 입력해주세요."); return; }
+
+  const valid = await verifyLogin(name, pw);
+  if (!valid) { showLoginError("이름 또는 비밀번호가 틀렸습니다."); return; }
+
+  // 로컬스토리지에 저장
+  localStorage.setItem('loginInfo', JSON.stringify({author:name, pw:pw}));
+  author = name;
+  document.getElementById("login-screen").classList.remove("show");
+  startApp();
+}
+
+async function doRegister() {
+  const name = document.getElementById("reg-name").value.trim();
+  const pw = document.getElementById("reg-pw").value;
+  const pw2 = document.getElementById("reg-pw2").value;
+
+  if (!name) { showRegError("이름을 입력해주세요."); return; }
+  if (!pw) { showRegError("비밀번호를 입력해주세요."); return; }
+  if (pw !== pw2) { showRegError("비밀번호가 일치하지 않습니다."); return; }
+  if (users.includes(name)) { showRegError("이미 사용중인 이름입니다."); return; }
+
+  try {
+    const res = await fetch(API, { method:"POST",
+      body: JSON.stringify({ action:"registerUser", name, pw }) });
+    const data = await res.json();
+    if (data.success) {
+      localStorage.setItem('loginInfo', JSON.stringify({author:name, pw:pw}));
+      author = name;
+      document.getElementById("login-screen").classList.remove("show");
+      startApp();
+    } else {
+      showRegError(data.error || "등록 실패");
+    }
+  } catch(e) { showRegError("네트워크 오류"); }
+}
+
+function doLogout() {
+  localStorage.removeItem('loginInfo');
+  author = "";
+  words = []; stats = {};
+  document.getElementById("login-screen").classList.add("show");
+  showLogin();
+  goHome();
+}
+
+function showLogin() {
+  document.getElementById("login-card").style.display="block";
+  document.getElementById("register-card").style.display="none";
+}
+function showRegister() {
+  document.getElementById("login-card").style.display="none";
+  document.getElementById("register-card").style.display="block";
+}
+function showLoginError(msg) {
+  const el = document.getElementById("login-error");
+  el.textContent = msg; el.style.display="block";
+}
+function showRegError(msg) {
+  const el = document.getElementById("reg-error");
+  el.textContent = msg; el.style.display="block";
+}
+
+// ── 앱 시작 ───────────────────────────────────────────────
+async function startApp() {
+  // 운영자 탭 표시
+  if (author === ADMIN) {
+    document.getElementById("admin-tab-btn").style.display="flex";
+    // 설정탭 숨기고 수정탭으로 대체
+    document.querySelectorAll(".tab-btn")[4].style.display="none";
+  } else {
+    // 일반 사용자: 설정탭 표시
+    document.querySelectorAll(".tab-btn")[3].style.display="flex";
+  }
+  document.getElementById("current-user-display").textContent = author;
+  document.getElementById("current-user-display2").textContent = author;
+  await loadData();
+}
+
 // ── 데이터 로드 ───────────────────────────────────────────
 async function loadData() {
   try {
-    const [uRes, wRes, sRes, eRes] = await Promise.all([
-      fetch(`${API}?action=getUsers`),
+    const [wRes, sRes, eRes] = await Promise.all([
       fetch(`${API}?action=getWords&author=${encodeURIComponent(author)}`),
       fetch(`${API}?action=getStats&author=${encodeURIComponent(author)}`),
       fetch(`${API}?action=getExcluded`),
     ]);
-    const uData = await uRes.json();
     const wData = await wRes.json();
     const sData = await sRes.json();
     const eData = await eRes.json();
-
-    if (uData.users && uData.users.length > 0) users = uData.users;
     if (wData.words) words = wData.words;
     if (sData.stats) stats = sData.stats;
     if (eData.excluded) excludedSet = new Set(eData.excluded);
-
     document.getElementById("conn-status").textContent = "● 연결됨";
     document.getElementById("conn-status").style.color = "var(--green)";
     updateAll();
@@ -457,27 +690,12 @@ async function loadData() {
   }
 }
 
-async function reloadUserData() {
-  try {
-    const [wRes, sRes] = await Promise.all([
-      fetch(`${API}?action=getWords&author=${encodeURIComponent(author)}`),
-      fetch(`${API}?action=getStats&author=${encodeURIComponent(author)}`),
-    ]);
-    const wData = await wRes.json();
-    const sData = await sRes.json();
-    if (wData.words) words = wData.words;
-    if (sData.stats) stats = sData.stats;
-    updateAll();
-  } catch(e) {}
-}
-
 function updateAll() {
   updateHeader();
   renderWordList();
   updateExamReady();
   filterVocab();
   renderStats();
-  renderUserButtons();
   renderSettingsUI();
 }
 
@@ -487,50 +705,65 @@ function updateHeader() {
 }
 
 // ── 탭 전환 ───────────────────────────────────────────────
-function switchTab(tab) {
+function selectTab(tab) {
   currentTab = tab;
+  // 헤더/탭바 숨기고 뒤로가기 표시
+  document.getElementById("header").classList.add("hidden");
+  document.getElementById("tabbar").classList.add("hidden");
+  document.getElementById("back-bar").classList.add("show");
+  const titles = {input:"표현 입력", exam:"시험", vocab:"단어장", stats:"통계", admin:"문장 수정", settings:"설정"};
+  document.getElementById("back-title").textContent = titles[tab] || "";
+
   document.querySelectorAll(".tab-section").forEach(s=>s.classList.remove("active"));
   document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
   document.getElementById("tab-"+tab).classList.add("active");
-  const tabs = ["input","exam","vocab","stats","settings"];
-  document.querySelectorAll(".tab-btn")[tabs.indexOf(tab)].classList.add("active");
+  const tabBtns = ["input","exam","vocab","stats","admin","settings"];
+  const idx = tabBtns.indexOf(tab);
+  if (idx >= 0) document.querySelectorAll(".tab-btn")[idx]?.classList.add("active");
+
   if (tab==="stats") renderStats();
+  if (tab==="exam") updateExamReady();
 }
 
-// ── 선택 입력 관련 ────────────────────────────────────────
+function goHome() {
+  document.getElementById("header").classList.remove("hidden");
+  document.getElementById("tabbar").classList.remove("hidden");
+  document.getElementById("back-bar").classList.remove("show");
+  // 시험 진행중이면 시험탭으로
+  if (currentTab === "exam") {
+    showExamReady();
+  }
+}
+
+// ── 선택 입력 ─────────────────────────────────────────────
 const OPTIONAL_LABELS = {
   pr:'발음', syn:'동의어', ant:'반의어',
   related:'관련표현', src:'출처', nar:'나레이션'
 };
-let optionalData = {};
 
 function addOptionalRow() {
   const sel = document.getElementById("optional-select");
   const key = sel.value;
   if (!key) return;
   sel.value = "";
-
   if (key === 'done') { trySave(); return; }
-
-  // 이미 있으면 포커스만
   if (document.getElementById(`f-${key}`)) {
     document.getElementById(`f-${key}`).focus(); return;
   }
-
   optionalData[key] = '';
   const rows = document.getElementById("optional-rows");
   const div = document.createElement('div');
   div.id = `row-${key}`;
   div.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:10px';
   div.innerHTML = `
-    <div style="font-size:13px;color:var(--muted);min-width:60px;font-weight:600">${OPTIONAL_LABELS[key]}</div>
+    <div style="font-size:16px;color:var(--muted);min-width:60px;font-weight:600">${OPTIONAL_LABELS[key]}</div>
     <input id="f-${key}" placeholder="${OPTIONAL_LABELS[key]}"
       autocapitalize="${key==='nar'?'sentences':'none'}"
       autocorrect="off" spellcheck="false"
       style="margin-bottom:0;flex:1"
       oninput="optionalData['${key}']=this.value">
     <button onclick="removeOptionalRow('${key}')"
-      style="background:transparent;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:4px 8px">✕</button>`;
+      style="background:transparent;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:4px 8px">✕</button>`;
   rows.appendChild(div);
   document.getElementById(`f-${key}`).focus();
 }
@@ -562,7 +795,7 @@ function trySave() {
   const ex_en = document.getElementById("f-ex-en").value.trim();
   const ex_ko = document.getElementById("f-ex-ko").value.trim();
   if (!en || !ko || !ex_en || !ex_ko) {
-    alert("영어표현, 우리말, 예문, 번역은 필수입니다."); return;
+    alert("영어, 우리말, 예문, 번역은 필수입니다."); return;
   }
   const dup = words.find(w=>w.en.trim().toLowerCase()===en.toLowerCase());
   if (dup) {
@@ -582,12 +815,9 @@ function getForm() {
     ko: document.getElementById("f-ko").value.trim(),
     ex_en: document.getElementById("f-ex-en").value.trim(),
     ex_ko: document.getElementById("f-ex-ko").value.trim(),
-    pr: optionalData.pr || '',
-    syn: optionalData.syn || '',
-    ant: optionalData.ant || '',
-    related: optionalData.related || '',
-    src: optionalData.src || '',
-    nar: optionalData.nar || '',
+    pr: optionalData.pr||'', syn: optionalData.syn||'',
+    ant: optionalData.ant||'', related: optionalData.related||'',
+    src: optionalData.src||'', nar: optionalData.nar||'',
   };
 }
 
@@ -607,8 +837,7 @@ async function doSave(form) {
     setTimeout(()=>{ btn.textContent="저장"; btn.className="btn btn-accent btn-full"; btn.disabled=false; }, 2000);
     updateHeader(); renderWordList(); updateExamReady();
   } catch(e) {
-    alert("저장 실패. 네트워크를 확인해주세요.");
-    btn.textContent = "저장"; btn.disabled = false;
+    alert("저장 실패."); btn.textContent = "저장"; btn.disabled = false;
   }
 }
 
@@ -619,7 +848,6 @@ function clearForm() {
   document.getElementById("optional-rows").innerHTML="";
   document.getElementById("optional-select").value="";
   optionalData={};
-  document.getElementById("f-en").focus();
 }
 
 function modalConfirm() { closeModal(); if (pendingForm) { doSave(pendingForm); pendingForm=null; } }
@@ -630,12 +858,12 @@ function renderWordList() {
   document.getElementById("word-list").innerHTML = words.slice(0,50).map(w=>`
     <div class="word-item">
       <div>
-        <div style="font-size:15px;font-weight:700">${w.en}</div>
-        <div style="font-size:13px;color:var(--muted);margin-top:2px">${w.ko}</div>
+        <div style="font-size:16px;font-weight:700">${w.en}</div>
+        <div style="font-size:14px;color:var(--muted);margin-top:2px">${w.ko}</div>
       </div>
-      <div style="font-size:12px;color:var(--dim)">${w.date||""}</div>
+      <div style="font-size:13px;color:var(--dim)">${w.date||""}</div>
     </div>`).join("") +
-    (words.length>50?`<div style="text-align:center;color:var(--muted);font-size:13px;padding:8px">... 외 ${words.length-50}개</div>`:"");
+    (words.length>50?`<div style="text-align:center;color:var(--muted);font-size:14px;padding:8px">... 외 ${words.length-50}개</div>`:"");
 }
 
 // ── 단어장 탭 ─────────────────────────────────────────────
@@ -660,8 +888,8 @@ function renderCard() {
   document.getElementById("card-nar").textContent = w.nar ? "💬 "+w.nar : "";
   document.getElementById("card-src").textContent = w.src ? "출처: "+w.src : "";
   let tags="";
-  if(w.syn) tags+=`<span style="background:var(--green-g);color:var(--green);border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700;margin-right:5px">동의어</span><span style="font-size:13px;color:var(--muted)">${w.syn}</span><br>`;
-  if(w.ant) tags+=`<span style="background:var(--red-g);color:var(--red);border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700;margin-right:5px">반의어</span><span style="font-size:13px;color:var(--muted)">${w.ant}</span>`;
+  if(w.syn) tags+=`<span style="background:var(--green-g);color:var(--green);border-radius:6px;padding:2px 8px;font-size:14px;font-weight:700;margin-right:5px">동의어</span><span style="font-size:14px;color:var(--muted)">${w.syn}</span><br>`;
+  if(w.ant) tags+=`<span style="background:var(--red-g);color:var(--red);border-radius:6px;padding:2px 8px;font-size:14px;font-weight:700;margin-right:5px">반의어</span><span style="font-size:14px;color:var(--muted)">${w.ant}</span>`;
   document.getElementById("card-tags").innerHTML=tags;
   document.getElementById("v-cc").textContent=s.cc;
   document.getElementById("v-wc").textContent=s.wc;
@@ -685,23 +913,18 @@ function vocabPrev() { if(vocabIdx>0){vocabIdx--;vocabFlipped=false;renderCard()
 function vocabNext() { if(vocabIdx<vocabFiltered.length-1){vocabIdx++;vocabFlipped=false;renderCard();} }
 
 // ── 시험 탭 ───────────────────────────────────────────────
-function getExamPool() {
-  return words.filter(w=>!isExcluded(w.en));
-}
+function getExamPool() { return words.filter(w=>!isExcluded(w.en)); }
 
 function buildCandidates() {
   const pool = getExamPool();
   if (pool.length===0) return null;
   const now = new Date();
   const msDay = 86400000;
-
   const recentInput = pool.filter(w=>now-new Date(w.date)<=settings.recentDays*msDay);
   const recentWrong = pool.filter(w=>{
-    const s=stats[w.id];
-    if(!s) return false;
+    const s=stats[w.id]; if(!s) return false;
     return (s.dates||[]).some(d=>d.result!=="정답"&&now-new Date(d.date)<=settings.recentWrongDays*msDay);
   });
-
   const candidates=[], used=new Set();
   const pickFrom=(arr)=>{
     const av=arr.filter(w=>!used.has(w.id));
@@ -721,8 +944,7 @@ function updateExamReady() {
   const now=new Date();
   const wrongMs=settings.recentWrongDays*86400000;
   const recentWrongCnt=pool.filter(w=>{
-    const s=stats[w.id];
-    if(!s) return false;
+    const s=stats[w.id]; if(!s) return false;
     return (s.dates||[]).some(d=>d.result!=="정답"&&now-new Date(d.date)<=wrongMs);
   }).length;
   document.getElementById("pool-count").textContent=pool.length.toLocaleString();
@@ -750,7 +972,6 @@ function startExam() {
   nextQuestion();
 }
 
-// ── 빈칸 추출 ─────────────────────────────────────────────
 function extractBlankCandidates(sentence) {
   const words = sentence.split(/\s+/);
   const candidates = [];
@@ -774,11 +995,9 @@ function nextQuestion() {
   currentWord = buildCandidates();
   if (!currentWord) { alert("출제 가능한 단어가 없습니다."); showExamReady(); return; }
 
-  // 피드백 초기화
   document.getElementById("feedback-area").style.display="none";
   document.getElementById("feedback-area").innerHTML="";
   document.getElementById("answer-area").style.display="block";
-
   document.getElementById("q-count").textContent=`오늘 ${examCount+1}번째 문제`;
   document.getElementById("q-score").innerHTML=
     `<span style="color:var(--green)">✓ ${examScore.c}</span>`+
@@ -786,8 +1005,6 @@ function nextQuestion() {
     `<span style="color:var(--red)">✗ ${examScore.w}</span>`;
 
   const candidates = extractBlankCandidates(currentWord.ex_en);
-
-  // 표현 단어 최소 1개 포함
   const exprWords = currentWord.en.toLowerCase().split(/\s+/)
     .map(w=>w.replace(/[-']/g,"").replace(/[^a-z]/g,""))
     .filter(w=>w.length>1&&!excludedSet.has(w));
@@ -806,7 +1023,7 @@ function nextQuestion() {
   blankWords=selected.sort((a,b)=>a.index-b.index);
   hintUsed=new Array(blankWords.length).fill(false);
 
-  // 문장에 빈칸 인라인 입력창 생성
+  // 문장 빈칸 생성
   const sentenceWords = currentWord.ex_en.split(/\s+/);
   const blankIndices = new Set(blankWords.map(b=>b.index));
   let blankCount=0;
@@ -815,7 +1032,7 @@ function nextQuestion() {
       const clean=w.replace(/[.,!?;:"']+$/g,"").replace(/^["']+/,"");
       const suffix=w.slice(clean.length);
       const prefix=w.slice(0,w.length-w.replace(/^["']+/,"").length);
-      const width=Math.max(40, clean.length*13);
+      const width=Math.max(40, clean.length*14);
       const idx=blankCount++;
       return `${prefix}<input class="blank-input-inline" id="bi-${idx}"
         style="width:${width}px"
@@ -823,7 +1040,7 @@ function nextQuestion() {
         maxlength="${clean.length}"
         readonly
         onclick="this.removeAttribute('readonly');this.focus();"
-        oninput="autoMoveNext(this, ${idx}, ${blankWords.length})"
+        oninput="autoMoveNext(this,${idx},${blankWords.length})"
         onkeydown="if(event.key==='Enter')checkAnswer()"
         placeholder="${'_'.repeat(clean.length)}">${suffix}`;
     }
@@ -832,42 +1049,27 @@ function nextQuestion() {
 
   document.getElementById("q-sentence").innerHTML=sentenceHtml;
   document.getElementById("q-translation").textContent=currentWord.ex_ko||"";
-  document.getElementById("hint-area").innerHTML="";
-  document.getElementById("answer-area").style.display="block";
-  document.getElementById("feedback-area").style.display="none";
 }
 
 function autoMoveNext(inp, idx, total) {
   if (inp.value.length >= parseInt(inp.maxLength)) {
-    // 다음 빈 칸 찾기 (순서 상관없이)
     let nextIdx = -1;
-    for (let i = 1; i <= total; i++) {
-      const nextI = (idx + i) % total;
-      const nextInp = document.getElementById(`bi-${nextI}`);
-      if (nextInp && !nextInp.value.trim()) {
-        nextIdx = nextI;
-        break;
-      }
+    for (let i=1;i<=total;i++) {
+      const nextI=(idx+i)%total;
+      const nextInp=document.getElementById(`bi-${nextI}`);
+      if (nextInp&&!nextInp.value.trim()) { nextIdx=nextI; break; }
     }
-    if (nextIdx !== -1) {
-      // 빈 칸 있으면 이동
-      const next = document.getElementById(`bi-${nextIdx}`);
-      next.removeAttribute('readonly');
-      next.focus();
-    } else {
-      // 모든 빈칸 입력 완료 → 정답 확인
-      checkAnswer();
-    }
+    if (nextIdx!==-1) {
+      const next=document.getElementById(`bi-${nextIdx}`);
+      next.removeAttribute('readonly'); next.focus();
+    } else { checkAnswer(); }
   }
 }
 
 function showHint() {
-  // 현재 포커스된 빈칸 찾기
-  let focusedIdx = -1;
+  let focusedIdx=-1;
   for (let i=0;i<blankWords.length;i++) {
-    if (document.activeElement===document.getElementById(`bi-${i}`)) {
-      focusedIdx=i; break;
-    }
+    if (document.activeElement===document.getElementById(`bi-${i}`)) { focusedIdx=i; break; }
   }
   if (focusedIdx===-1) {
     for (let i=0;i<blankWords.length;i++) {
@@ -876,13 +1078,14 @@ function showHint() {
     }
   }
   if (focusedIdx===-1) focusedIdx=0;
-
   hintUsed[focusedIdx]=true;
   const b=blankWords[focusedIdx];
   const inp=document.getElementById(`bi-${focusedIdx}`);
   if (inp) {
     inp.removeAttribute('readonly');
-    inp.value=b.word[0];
+    // 첫번째 단어(index===0이면 문장 맨앞)는 대문자
+    const firstChar = b.index === 0 ? b.word[0].toUpperCase() : b.word[0];
+    inp.value=firstChar;
     inp.classList.add("hint-used");
     inp.focus();
   }
@@ -890,7 +1093,6 @@ function showHint() {
 
 async function checkAnswer() {
   if (!currentWord||blankWords.length===0) return;
-
   const results=blankWords.map((b,i)=>{
     const inp=document.getElementById(`bi-${i}`);
     const ans=inp?inp.value.trim().toLowerCase():"";
@@ -901,60 +1103,48 @@ async function checkAnswer() {
   const correctCount=results.filter(r=>r.correct).length;
   const wrongCount=results.filter(r=>!r.correct).length;
   const allCorrect=wrongCount===0;
-
   document.getElementById("answer-area").style.display="none";
 
-  // 문장 단위 통계 (ID 기반)
   const wordId=currentWord.id;
   const today=new Date().toISOString().slice(0,10);
   if (!stats[wordId]) stats[wordId]={cc:0,wc:0,dates:[]};
   if (allCorrect) stats[wordId].cc++; else stats[wordId].wc++;
   stats[wordId].dates.push({date:today,result:allCorrect?"정답":"오답"});
 
-  // 단어 수 기준 점수 누적
-  examScore.c += correctCount;
-  examScore.w += wrongCount;
+  examScore.c+=correctCount; examScore.w+=wrongCount;
   examCount++;
-  todayData = {date:today, count:examCount, words_c:examScore.c, words_w:examScore.w};
-  saveTodayCount(todayData);
+  todayData={date:today,count:examCount,words_c:examScore.c,words_w:examScore.w};
+  saveTodayData(todayData);
 
-  // 모든 빈칸 색상 통일
-  blankWords.forEach((_,i)=>{
+  // 개별 색상
+  results.forEach((r,i)=>{
     const inp=document.getElementById(`bi-${i}`);
-    if(inp) {
-      inp.classList.remove("hint-used");
-      inp.style.color = allCorrect ? "var(--green)" : "var(--red)";
-    }
+    if(inp){ inp.classList.remove("hint-used"); inp.style.color=r.correct?"var(--green)":"var(--red)"; }
   });
 
-  // 틀린 단어 표시 (입력값 → 정답)
-  const wrongHtml=results
-    .filter(r=>!r.correct)
-    .map(r=>`
+  const wrongHtml=results.filter(r=>!r.correct).map(r=>`
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
-      <span style="font-size:14px;color:var(--muted)">${r.ans||"미입력"}</span>
-      <span style="font-size:14px;color:var(--muted)">→</span>
-      <span style="font-size:15px;color:var(--yellow);font-weight:700">${r.word}</span>
-      ${r.hintUsed?`<span style="font-size:12px;color:var(--muted)">(힌트)</span>`:""}
+      <span style="font-size:16px;color:var(--muted)">${r.ans||"미입력"}</span>
+      <span style="font-size:16px;color:var(--muted)">→</span>
+      <span style="font-size:18px;color:var(--yellow);font-weight:700">${r.word}</span>
+      ${r.hintUsed?`<span style="font-size:13px;color:var(--muted)">(힌트)</span>`:""}
     </div>`).join("");
 
   const fb=document.getElementById("feedback-area");
   fb.style.display="block";
   fb.className="feedback-box "+(allCorrect?"feedback-correct":"feedback-wrong");
   fb.innerHTML=`
-    ${allCorrect?`<div style="font-size:18px;font-weight:700;color:var(--green)">✅ 정답!</div>`:""}
+    ${allCorrect?`<div style="font-size:20px;font-weight:700;color:var(--green)">✅ 정답!</div>`:""}
     ${!allCorrect?`<div style="margin-bottom:4px">${wrongHtml}</div>`:""}
     <div class="row" style="margin-top:14px">
       <button class="btn btn-accent flex1" onclick="nextQuestion()">다음 →</button>
-      <button class="btn btn-muted" style="font-size:13px" onclick="finishExam()">종료</button>
+      <button class="btn btn-muted" style="font-size:15px" onclick="finishExam()">종료</button>
     </div>`;
 
   try {
     await fetch(API,{method:"POST",body:JSON.stringify({
-      action:"saveResult", author,
-      wordId: wordId,
-      word: currentWord.en,
-      result: allCorrect?"정답":"오답",
+      action:"saveResult", author, wordId,
+      word:currentWord.en, result:allCorrect?"정답":"오답",
     })});
   } catch(e){}
 }
@@ -977,7 +1167,6 @@ function renderStats() {
   const tw=Object.values(stats).reduce((s,v)=>s+(v.wc||0),0);
   const mastered=pool.filter(w=>(stats[w.id]?.cc||0)>=3&&(stats[w.id]?.wc||0)===0).length;
   const weak=pool.filter(w=>(stats[w.id]?.wc||0)>=3).length;
-
   document.getElementById("stats-grid").innerHTML=[
     ["내 단어",words.length.toLocaleString(),"var(--accent)"],
     ["출제 가능",pool.length.toLocaleString(),"var(--text)"],
@@ -985,21 +1174,12 @@ function renderStats() {
     ["취약 단어",weak,"var(--red)"],
     ["누적 정답",tc,"var(--yellow)"],
     ["누적 오답",tw,"var(--muted)"],
-  ].map(([l,v,c])=>`
-    <div class="stat-card">
-      <div class="stat-val" style="color:${c}">${v}</div>
-      <div class="stat-label">${l}</div>
-    </div>`).join("");
-
+  ].map(([l,v,c])=>`<div class="stat-card"><div class="stat-val" style="color:${c}">${v}</div><div class="stat-label">${l}</div></div>`).join("");
   const pct=tc+tw===0?0:Math.round(tc/(tc+tw)*100);
   document.getElementById("overall-bar").style.width=pct+"%";
   document.getElementById("overall-pct").textContent=tc+tw===0?"-":pct+"%";
-
-  const weakList=pool
-    .filter(w=>(stats[w.id]?.wc||0)>0)
-    .sort((a,b)=>(stats[b.id]?.wc||0)-(stats[a.id]?.wc||0))
-    .slice(0,20);
-
+  const weakList=pool.filter(w=>(stats[w.id]?.wc||0)>0)
+    .sort((a,b)=>(stats[b.id]?.wc||0)-(stats[a.id]?.wc||0)).slice(0,20);
   document.getElementById("stats-list").innerHTML=weakList.length===0
     ?`<div class="card" style="text-align:center;color:var(--muted);padding:20px">오답 기록 없음</div>`
     :weakList.map(w=>{
@@ -1009,45 +1189,107 @@ function renderStats() {
       const c=p>=80?"var(--green)":p>=50?"var(--yellow)":"var(--red)";
       return `<div class="card" style="padding:13px 14px">
         <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-          <div>
-            <span style="font-weight:700;font-size:15px">${w.en}</span>
-            <span style="font-size:13px;color:var(--muted);margin-left:8px">${w.ko}</span>
-          </div>
-          <span style="font-size:13px;font-weight:700;color:${c}">${p}%</span>
+          <div><span style="font-weight:700;font-size:16px">${w.en}</span>
+          <span style="font-size:14px;color:var(--muted);margin-left:8px">${w.ko}</span></div>
+          <span style="font-size:14px;font-weight:700;color:${c}">${p}%</span>
         </div>
         <div class="progress-bar"><div class="progress-fill" style="width:${p}%;background:${c}"></div></div>
         <div style="display:flex;gap:8px;margin-top:5px">
-          <span style="font-size:12px;color:var(--muted)">정답 ${s.cc}</span>
-          <span style="font-size:12px;color:var(--muted)">오답 ${s.wc}</span>
+          <span style="font-size:13px;color:var(--muted)">정답 ${s.cc}</span>
+          <span style="font-size:13px;color:var(--muted)">오답 ${s.wc}</span>
         </div>
       </div>`;
     }).join("");
 }
 
+// ── 수정 탭 (운영자 전용) ─────────────────────────────────
+function adminSearch() {
+  const q = document.getElementById("admin-search").value.trim().toLowerCase();
+  if (!q) return;
+  const results = words.filter(w=>
+    w.ex_en.toLowerCase().includes(q) || w.ex_ko.includes(q)
+  );
+  document.getElementById("admin-results").style.display="block";
+  document.getElementById("admin-edit").style.display="none";
+  if (results.length===0) {
+    document.getElementById("admin-result-list").innerHTML=
+      `<div class="card" style="text-align:center;color:var(--muted)">검색 결과 없음</div>`;
+    return;
+  }
+  document.getElementById("admin-result-list").innerHTML=results.slice(0,20).map((w,i)=>`
+    <div class="card" style="cursor:pointer;padding:12px 14px" onclick="selectEditWord('${w.id}')">
+      <div style="font-size:15px;font-weight:700;color:var(--accent);margin-bottom:4px">${w.en}</div>
+      <div style="font-size:14px;color:var(--text);line-height:1.4">${w.ex_en}</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:4px">${w.ex_ko}</div>
+    </div>`).join("");
+}
+
+function selectEditWord(id) {
+  editingWord = words.find(w=>w.id===id);
+  if (!editingWord) return;
+  document.getElementById("admin-results").style.display="none";
+  document.getElementById("admin-edit").style.display="block";
+  document.getElementById("edit-orig-en").textContent = editingWord.ex_en;
+  document.getElementById("edit-new-en").value = editingWord.ex_en;
+  document.getElementById("edit-orig-ko").textContent = editingWord.ex_ko;
+  document.getElementById("edit-new-ko").value = editingWord.ex_ko;
+  document.getElementById("edit-status").textContent="";
+}
+
+function cancelEdit() {
+  editingWord=null;
+  document.getElementById("admin-edit").style.display="none";
+  document.getElementById("admin-results").style.display="none";
+  document.getElementById("admin-search").value="";
+}
+
+async function saveEdit() {
+  if (!editingWord) return;
+  const newEnEx = document.getElementById("edit-new-en").value.trim();
+  const newKoEx = document.getElementById("edit-new-ko").value.trim();
+  if (!newEnEx || !newKoEx) { alert("내용을 입력해주세요."); return; }
+
+  document.getElementById("edit-status").textContent="저장 중...";
+  document.getElementById("edit-status").style.color="var(--yellow)";
+
+  try {
+    const res = await fetch(API, { method:"POST",
+      body: JSON.stringify({
+        action:"updateWord",
+        author,
+        wordId: editingWord.id,
+        ex_en: newEnEx,
+        ex_ko: newKoEx,
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      // 로컬 업데이트
+      const idx = words.findIndex(w=>w.id===editingWord.id);
+      if (idx>=0) { words[idx].ex_en=newEnEx; words[idx].ex_ko=newKoEx; }
+      document.getElementById("edit-status").textContent="✅ 저장 완료!";
+      document.getElementById("edit-status").style.color="var(--green)";
+      setTimeout(()=>cancelEdit(), 1500);
+    } else {
+      document.getElementById("edit-status").textContent="❌ 저장 실패";
+      document.getElementById("edit-status").style.color="var(--red)";
+    }
+  } catch(e) {
+    document.getElementById("edit-status").textContent="❌ 네트워크 오류";
+    document.getElementById("edit-status").style.color="var(--red)";
+  }
+}
+
 // ── 설정 탭 ───────────────────────────────────────────────
-function renderUserButtons() {
-  document.getElementById("user-buttons").innerHTML=users.map(u=>
-    `<button class="btn ${u===author?"btn-yellow":"btn-muted"}"
-      style="margin:4px;font-size:14px" onclick="selectUser('${u}')">${u}</button>`
-  ).join("");
-}
-
-function selectUser(u) {
-  author=u;
-  localStorage.setItem('author',u);
-  reloadUserData();
-  renderUserButtons();
-}
-
 function renderSettingsUI() {
   const days=[7,14,30,90];
   document.getElementById("recent-days-btns").innerHTML=days.map(d=>
     `<button class="btn ${settings.recentDays===d?"btn-accent":"btn-muted"}"
-      style="padding:8px 14px;font-size:13px" onclick="setDays('recentDays',${d})">${d}일</button>`
+      style="padding:8px 14px;font-size:15px" onclick="setDays('recentDays',${d})">${d}일</button>`
   ).join("");
   document.getElementById("wrong-days-btns").innerHTML=days.map(d=>
     `<button class="btn ${settings.recentWrongDays===d?"btn-accent":"btn-muted"}"
-      style="padding:8px 14px;font-size:13px" onclick="setDays('recentWrongDays',${d})">${d}일</button>`
+      style="padding:8px 14px;font-size:15px" onclick="setDays('recentWrongDays',${d})">${d}일</button>`
   ).join("");
   ["recentInputCount","recentWrongCount","totalPoolCount"].forEach(k=>{
     document.getElementById("cnt-"+k).textContent=settings[k];
@@ -1068,7 +1310,7 @@ function saveSettings() {
 }
 
 // ── 초기화 ────────────────────────────────────────────────
-loadData();
+initLogin();
 </script>
 </body>
 </html>
