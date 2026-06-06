@@ -2,7 +2,6 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://script.google.com https://fonts.googleapis.com https://fonts.gstatic.com;">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -172,10 +171,9 @@ input:focus, textarea:focus { border-color: var(--accent); }
   <!-- 기존 사용자 로그인 -->
   <div class="card" id="login-card">
     <div style="font-size:18px;font-weight:700;color:var(--yellow);margin-bottom:16px">🔐 로그인</div>
-    <div class="label">이름 선택</div>
-    <select id="login-name-select" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:18px;padding:12px 14px;outline:none;font-family:inherit;margin-bottom:10px">
-      <option value="">이름을 선택하세요...</option>
-    </select>
+    <div class="label">이름</div>
+    <input id="login-name-select" placeholder="이름 입력 (예: 강규연)"
+      autocapitalize="words" style="font-size:20px">
     <div class="label">비밀번호</div>
     <input id="login-pw" type="password" placeholder="비밀번호 입력" style="font-size:20px"
       onkeydown="if(event.key==='Enter')doLogin()">
@@ -578,18 +576,23 @@ async function verifyLogin(name, pw) {
 }
 
 async function doLogin() {
-  const name = document.getElementById("login-name-select").value;
-  const pw = document.getElementById("login-pw").value;
+  const name = document.getElementById("login-name-select").value.trim();
+  const pw = document.getElementById("login-pw").value.trim();
   if (!name || !pw) { showLoginError("이름과 비밀번호를 입력해주세요."); return; }
 
-  const valid = await verifyLogin(name, pw);
-  if (!valid) { showLoginError("이름 또는 비밀번호가 틀렸습니다."); return; }
+  try {
+    const res = await fetch(`${API}?action=verifyLogin&name=${encodeURIComponent(name)}&pw=${encodeURIComponent(pw)}`);
+    const data = await res.json();
+    
+    if (!data.valid) { showLoginError("이름 또는 비밀번호가 틀렸습니다."); return; }
 
-  // 로컬스토리지에 저장
-  localStorage.setItem('loginInfo', JSON.stringify({author:name, pw:pw}));
-  author = name;
-  document.getElementById("login-screen").classList.remove("show");
-  startApp();
+    localStorage.setItem('loginInfo', JSON.stringify({author:name, pw:pw}));
+    author = name;
+    document.getElementById("login-screen").classList.remove("show");
+    startApp();
+  } catch(e) {
+    showLoginError("서버 연결 실패. 다시 시도해주세요.");
+  }
 }
 
 async function doRegister() {
@@ -844,8 +847,10 @@ function modalConfirm() { closeModal(); if (pendingForm) { doSave(pendingForm); 
 function closeModal() { document.getElementById("modal-overlay").classList.remove("show"); }
 
 function renderWordList() {
-  document.getElementById("my-word-count").textContent = "내 표현 " + words.length.toLocaleString() + "개";
-  document.getElementById("word-list").innerHTML = words.slice(0,50).map(w=>`
+  const countEl = document.getElementById("my-word-count");
+  const listEl = document.getElementById("word-list");
+  if (countEl) countEl.textContent = "내 표현 " + words.length.toLocaleString() + "개";
+  if (listEl) listEl.innerHTML = words.slice(0,50).map(w=>`
     <div class="word-item">
       <div>
         <div style="font-size:16px;font-weight:700">${w.en}</div>
