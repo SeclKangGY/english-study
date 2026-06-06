@@ -539,24 +539,16 @@ function isExcluded(en) {
 
 // ── 로그인 ────────────────────────────────────────────────
 async function initLogin() {
-  // 자동 로그인 확인
   const saved = JSON.parse(localStorage.getItem('loginInfo') || '{}');
   if (saved.author && saved.pw) {
-    // 서버에서 사용자 목록 로드
     try {
-      const res = await fetch(`${API}?action=getUsers`);
-      const data = await res.json();
-      if (data.users) users = data.users;
-      // 자동 로그인 검증
-      const valid = await verifyLogin(saved.author, saved.pw);
-      if (valid) {
-        author = saved.author;
-        startApp();
-        return;
-      }
-    } catch(e) {}
+      author = saved.author;
+      await startApp();
+      return;
+    } catch(e) {
+      console.log('자동 로그인 실패:', e);
+    }
   }
-  // 로그인 화면 표시
   showLoginScreen();
 }
 
@@ -679,8 +671,11 @@ async function loadData() {
     document.getElementById("conn-status").style.color = "var(--green)";
     updateAll();
   } catch(e) {
+    console.log('loadData 오류:', e);
     document.getElementById("conn-status").textContent = "● 오프라인";
     document.getElementById("conn-status").style.color = "var(--red)";
+    // 3초 후 재시도
+    setTimeout(loadData, 3000);
   }
 }
 
