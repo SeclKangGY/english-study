@@ -301,12 +301,12 @@ input:focus, textarea:focus { border-color: var(--accent); }
       <div style="font-size:18px;font-weight:700;color:var(--yellow);margin-bottom:12px">🎯 시험 시작</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
         <div class="stat-card">
-          <div class="stat-val" id="pool-count" style="color:var(--accent)">0</div>
-          <div class="stat-label">출제 가능</div>
+          <div class="stat-val" id="today-correct" style="color:var(--green)">0</div>
+          <div class="stat-label">오늘 정답</div>
         </div>
         <div class="stat-card">
-          <div class="stat-val" id="wrong-count-display" style="color:var(--red)">0</div>
-          <div class="stat-label">최근 오답</div>
+          <div class="stat-val" id="today-wrong" style="color:var(--red)">0</div>
+          <div class="stat-label">오늘 오답</div>
         </div>
       </div>
       <div class="card" style="background:var(--bg);margin-bottom:12px;padding:12px">
@@ -936,14 +936,8 @@ function buildCandidates() {
 
 function updateExamReady() {
   const pool=getExamPool();
-  const now=new Date();
-  const wrongMs=settings.recentWrongDays*86400000;
-  const recentWrongCnt=pool.filter(w=>{
-    const s=stats[w.id]; if(!s) return false;
-    return (s.dates||[]).some(d=>d.result!=="정답"&&now-new Date(d.date)<=wrongMs);
-  }).length;
-  document.getElementById("pool-count").textContent=pool.length.toLocaleString();
-  document.getElementById("wrong-count-display").textContent=recentWrongCnt;
+  document.getElementById("today-correct").textContent=examScore.c;
+  document.getElementById("today-wrong").textContent=examScore.w;
   document.getElementById("algo-desc").innerHTML=
     `최근 ${settings.recentDays}일 입력 → ${settings.recentInputCount}개 후보<br>`+
     `최근 ${settings.recentWrongDays}일 오답 → ${settings.recentWrongCount}개 후보<br>`+
@@ -981,6 +975,7 @@ function extractBlankCandidates(sentence) {
     const cleaned = clean.replace(/[-']/g,"");
     if (/[^a-zA-Z0-9]/.test(cleaned)) continue;
     if (/^[0-9]+$/.test(clean)) continue;
+    if (/^[0-9]/.test(clean)) continue; // 숫자로 시작하는 단어 제외 (90-ton 등)
     candidates.push({word:clean, raw:raw, index:i});
   }
   return candidates;
@@ -1027,7 +1022,7 @@ function nextQuestion() {
       const clean=w.replace(/[.,!?;:"']+$/g,"").replace(/^["']+/,"");
       const suffix=w.slice(clean.length);
       const prefix=w.slice(0,w.length-w.replace(/^["']+/,"").length);
-      const width=Math.max(40, clean.length*14);
+      const width=Math.max(50, clean.length*18);
       const idx=blankCount++;
       return `${prefix}<input class="blank-input-inline" id="bi-${idx}"
         style="width:${width}px"
