@@ -624,7 +624,12 @@ function doLogout() {
   localStorage.removeItem('loginInfo');
   author = "";
   words = []; stats = {};
+  examScore = {c:0, w:0};
+  examCount = 0;
+  todayData = getTodayData();
   document.getElementById("login-screen").classList.add("show");
+  // 설정탭 숨기기
+  document.getElementById("settings-tab-btn").style.display="none";
   showLogin();
   goHome();
 }
@@ -915,23 +920,34 @@ function buildCandidates() {
   if (pool.length===0) return null;
   const now = new Date();
   const msDay = 86400000;
+
   const recentInput = pool.filter(w=>now-new Date(w.date)<=settings.recentDays*msDay);
   const recentWrong = pool.filter(w=>{
     const s=stats[w.id]; if(!s) return false;
     return (s.dates||[]).some(d=>d.result!=="정답"&&now-new Date(d.date)<=settings.recentWrongDays*msDay);
   });
-  const candidates=[], used=new Set();
-  const pickFrom=(arr)=>{
-    const av=arr.filter(w=>!used.has(w.id));
-    if(av.length===0) return null;
-    const p=av[Math.floor(Math.random()*av.length)];
-    used.add(p.id); return p;
-  };
-  for(let i=0;i<settings.recentInputCount;i++){const p=pickFrom(recentInput)||pickFrom(pool);if(p)candidates.push(p);}
-  for(let i=0;i<settings.recentWrongCount;i++){const p=pickFrom(recentWrong)||pickFrom(pool);if(p)candidates.push(p);}
-  for(let i=0;i<settings.totalPoolCount;i++){const p=pickFrom(pool);if(p)candidates.push(p);}
-  if(candidates.length===0) return null;
-  return candidates[Math.floor(Math.random()*candidates.length)];
+
+  // 가중치 기반 풀 생성
+  const weightedPool = [];
+  const added = new Set();
+
+  // 최근 오답: 높은 가중치 (recentWrongCount * 3배)
+  recentWrong.forEach(w => {
+    for (let i=0; i<settings.recentWrongCount*3; i++) weightedPool.push(w);
+    added.add(w.id);
+  });
+
+  // 최근 입력: 중간 가중치 (recentInputCount * 2배)
+  recentInput.forEach(w => {
+    for (let i=0; i<settings.recentInputCount*2; i++) weightedPool.push(w);
+    if (!added.has(w.id)) added.add(w.id);
+  });
+
+  // 전체 풀: 낮은 가중치 (1배)
+  pool.forEach(w => weightedPool.push(w));
+
+  if (weightedPool.length===0) return null;
+  return weightedPool[Math.floor(Math.random()*weightedPool.length)];
 }
 
 function updateExamReady() {
@@ -1068,14 +1084,22 @@ function showHint() {
     }
   }
   if (focusedIdx===-1) focusedIdx=0;
+
   hintUsed[focusedIdx]=true;
   const b=blankWords[focusedIdx];
   const inp=document.getElementById(`bi-${focusedIdx}`);
   if (inp) {
     inp.removeAttribute('readonly');
-    // 첫번째 단어(index===0이면 문장 맨앞)는 대문자
-    const firstChar = b.index === 0 ? b.word[0].toUpperCase() : b.word[0];
-    inp.value=firstChar;
+    // 현재 입력된 글자수 확인 → 한 글자 더 추가
+    const currentLen = inp.value.length;
+    const nextLen = currentLen + 1;
+    // 전체 단어에서 nextLen 글자까지 표시
+    let hintText = b.word.slice(0, nextLen);
+    // 첫글자가 문장 첫단어면 대문자
+    if (b.index === 0) {
+      hintText = hintText[0].toUpperCase() + hintText.slice(1);
+    }
+    inp.value = hintText;
     inp.classList.add("hint-used");
     inp.focus();
   }
