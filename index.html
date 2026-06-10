@@ -660,6 +660,9 @@ async function startApp() {
   document.getElementById("current-user-display").textContent = author;
   document.getElementById("current-user-display2").textContent = author;
   await loadData();
+  // 기본 탭을 시험으로 설정 (헤더/탭바 표시 상태 유지)
+  selectTab('exam');
+  goHome();
 }
 
 // ── 데이터 로드 ───────────────────────────────────────────
@@ -969,6 +972,12 @@ function showExamReady() {
 }
 
 function startExam() {
+  // 헤더/탭바 숨기기
+  document.getElementById("header").classList.add("hidden");
+  document.getElementById("tabbar").classList.add("hidden");
+  document.getElementById("back-bar").classList.add("show");
+  document.getElementById("back-title").textContent = "시험";
+
   document.getElementById("exam-ready").style.display="none";
   document.getElementById("exam-result").style.display="none";
   document.getElementById("exam-question").style.display="block";
