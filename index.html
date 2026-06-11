@@ -1087,6 +1087,13 @@ function showHint() {
     if (document.activeElement===document.getElementById(`bi-${i}`)) { focusedIdx=i; break; }
   }
   if (focusedIdx===-1) {
+    // 포커스 없으면 힌트 사용 중인 빈칸 중 가장 앞 것
+    for (let i=0;i<blankWords.length;i++) {
+      if (hintUsed[i]) { focusedIdx=i; break; }
+    }
+  }
+  if (focusedIdx===-1) {
+    // 그것도 없으면 첫번째 미입력 빈칸
     for (let i=0;i<blankWords.length;i++) {
       const inp=document.getElementById(`bi-${i}`);
       if (inp&&!inp.value.trim()) { focusedIdx=i; break; }
@@ -1099,12 +1106,9 @@ function showHint() {
   const inp=document.getElementById(`bi-${focusedIdx}`);
   if (inp) {
     inp.removeAttribute('readonly');
-    // 현재 입력된 글자수 확인 → 한 글자 더 추가
     const currentLen = inp.value.length;
     const nextLen = currentLen + 1;
-    // 전체 단어에서 nextLen 글자까지 표시
     let hintText = b.word.slice(0, nextLen);
-    // 첫글자가 문장 첫단어면 대문자
     if (b.index === 0) {
       hintText = hintText[0].toUpperCase() + hintText.slice(1);
     }
