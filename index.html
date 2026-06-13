@@ -513,8 +513,13 @@ let optionalData = {};
 let editingWord = null;
 
 // 당일 문제 수
+function getKSTDate() {
+  const now = new Date();
+  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  return kst.toISOString().slice(0,10);
+}
 function getTodayData() {
-  const today = new Date().toISOString().slice(0,10);
+  const today = getKSTDate();
   const saved = JSON.parse(localStorage.getItem('todayExam') || '{}');
   if (saved.date === today) return saved;
   return {date:today, count:0, words_c:0, words_w:0};
@@ -1051,7 +1056,7 @@ function nextQuestion() {
       const idx=blankCount++;
       return `${prefix}<input class="blank-input-inline" id="bi-${idx}"
         style="width:${width}px"
-        autocapitalize="none" autocorrect="off" spellcheck="false"
+        autocapitalize="none" autocorrect="off" autocomplete="off" spellcheck="false"
         maxlength="${clean.length}"
         readonly
         onclick="this.removeAttribute('readonly');this.focus();"
