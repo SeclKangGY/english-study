@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 680 680">
+<title>영어학습 앱 아이콘</title>
+<circle cx="340" cy="340" r="300" fill="#1a3a6b"/>
+<circle cx="340" cy="340" r="260" fill="#1e4480"/>
+<rect x="200" y="200" width="50" height="280" rx="8" fill="#ffffff"/>
+<rect x="200" y="200" width="220" height="50" rx="8" fill="#ffffff"/>
+<rect x="200" y="315" width="180" height="50" rx="8" fill="#4a9eff"/>
+<rect x="200" y="430" width="220" height="50" rx="8" fill="#ffffff"/>
+<circle cx="480" cy="220" r="18" fill="#4a9eff"/>
+<circle cx="520" cy="270" r="12" fill="#7ab8ff"/>
+<circle cx="500" cy="320" r="8" fill="#a8d4ff"/>
+<circle cx="160" cy="480" r="14" fill="#4a9eff"/>
+<circle cx="120" cy="440" r="9" fill="#7ab8ff"/>
+<rect x="430" y="380" width="80" height="12" rx="6" fill="#7ab8ff" opacity="0.7"/>
+<rect x="430" y="404" width="60" height="12" rx="6" fill="#7ab8ff" opacity="0.5"/>
+<rect x="430" y="428" width="70" height="12" rx="6" fill="#7ab8ff" opacity="0.3"/>
+</svg>
