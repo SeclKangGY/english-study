@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -11,18 +13,18 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 :root {
-  --bg: #e8f4fd; --card: #ffffff;
-  --border: #c5dff0;
-  --accent: #2563eb; --accent-g: rgba(37,99,235,0.10);
-  --yellow: #d97706; --yellow-g: rgba(217,119,6,0.10);
-  --green: #059669; --green-g: rgba(5,150,105,0.10);
-  --red: #dc2626; --red-g: rgba(220,38,38,0.10);
-  --text: #1e293b; --muted: #64748b; --dim: #94a3b8;
+  --bg: #080b14; --card: #0d1120;
+  --border: #1e2640;
+  --accent: #3b7fff; --accent-g: rgba(59,127,255,0.12);
+  --yellow: #fbbf24; --yellow-g: rgba(251,191,36,0.12);
+  --green: #10b981; --green-g: rgba(16,185,129,0.12);
+  --red: #ef4444; --red-g: rgba(239,68,68,0.12);
+  --text: #e2e8f0; --muted: #64748b; --dim: #334155;
 }
 body {
   background: var(--bg); color: var(--text);
   font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
-  max-width: 100%; margin: 0 auto; min-height: 100vh;
+  max-width: 480px; margin: 0 auto; min-height: 100vh;
   overflow-x: hidden;
 }
 #header {
@@ -63,7 +65,7 @@ body {
   font-family: inherit; padding: 4px 8px;
 }
 #back-title { font-size: 14px; font-weight: 700; color: var(--text); }
-.body { padding: 16px; padding-bottom: 32px; max-width: 680px; margin: 0 auto; }
+.body { padding: 16px; padding-bottom: 32px; }
 .card {
   background: var(--card); border: 1px solid var(--border);
   border-radius: 14px; padding: 14px; margin-bottom: 10px;
@@ -73,7 +75,7 @@ body {
   margin-bottom: 6px; font-weight: 600;
 }
 input, textarea {
-  width: 100%; background: #ffffff; border: 1px solid var(--border);
+  width: 100%; background: var(--bg); border: 1px solid var(--border);
   border-radius: 10px; color: var(--text); font-size: 20px;
   padding: 12px 14px; outline: none; margin-bottom: 10px;
   font-family: inherit; transition: border 0.2s;
@@ -115,7 +117,7 @@ input:focus, textarea:focus { border-color: var(--accent); }
 }
 #modal-overlay.show { display: flex; }
 #modal-box {
-  background: var(--card); border: 2px solid var(--accent);
+  background: var(--card); border: 2px solid var(--yellow);
   border-radius: 20px; padding: 22px; max-width: 420px; width: 100%;
 }
 .spinner {
@@ -142,19 +144,18 @@ input:focus, textarea:focus { border-color: var(--accent); }
   margin-bottom: 14px; line-height: 1.3;
 }
 .blank-input-inline {
-  display: inline-block; background: #eef4ff; border: none;
-  border-bottom: 2px solid var(--accent);
-  color: var(--accent); font-size: 22px; font-weight: 700;
+  display: inline-block; background: transparent; border: none;
+  color: var(--yellow); font-size: 22px; font-weight: 700;
   font-family: inherit; outline: none; padding: 0 2px;
   margin: 0 2px; text-align: center; vertical-align: middle;
   letter-spacing: 2px;
 }
-.blank-input-inline:focus { color: var(--accent); background: #dbeafe; }
+.blank-input-inline:focus { color: var(--accent); }
 .blank-input-inline.hint-used { color: var(--red); }
 /* 로그인 화면 */
 #login-screen {
   display: none; position: fixed; inset: 0;
-  background: #e8f4fd; z-index: 200;
+  background: var(--bg); z-index: 200;
   padding: 40px 20px; overflow-y: auto;
 }
 #login-screen.show { display: block; }
@@ -172,24 +173,19 @@ input:focus, textarea:focus { border-color: var(--accent); }
   <!-- 기존 사용자 로그인 -->
   <div class="card" id="login-card">
     <div style="font-size:18px;font-weight:700;color:var(--yellow);margin-bottom:16px">🔐 로그인</div>
-    <div class="label">이름 선택</div>
-    <select id="login-name-select" onchange="onNameSelect()"
-      style="width:100%;background:#ffffff;border:1px solid var(--border);
-      border-radius:10px;color:var(--text);font-size:20px;
-      padding:12px 14px;outline:none;font-family:inherit;margin-bottom:10px">
-      <option value="">이름을 선택하세요...</option>
-    </select>
-    <div id="new-name-row" style="display:none">
-      <div class="label">이름 직접 입력</div>
-      <input id="login-name-input" placeholder="이름 입력 (예: 홍길동)"
-        autocapitalize="words" style="font-size:20px">
-    </div>
+    <div class="label">이름</div>
+    <input id="login-name-select" placeholder="이름 입력 (예: 강규연)"
+      autocapitalize="words" style="font-size:20px">
     <div class="label">비밀번호</div>
     <input id="login-pw" type="password" placeholder="비밀번호 입력" style="font-size:20px"
       onkeydown="if(event.key==='Enter')doLogin()">
     <button class="btn btn-accent btn-full" onclick="doLogin()">로그인</button>
     <div id="login-error" style="color:var(--red);font-size:14px;margin-top:8px;display:none">
       이름 또는 비밀번호가 틀렸습니다.
+    </div>
+    <div style="text-align:center;margin-top:16px">
+      <span style="font-size:14px;color:var(--muted)">처음 사용하시나요? </span>
+      <button onclick="showRegister()" style="background:transparent;border:none;color:var(--accent);font-size:14px;cursor:pointer;font-family:inherit;font-weight:700">새 사용자 등록</button>
     </div>
   </div>
 
@@ -284,7 +280,7 @@ input:focus, textarea:focus { border-color: var(--accent); }
     </div>
     <div id="optional-rows"></div>
     <select id="optional-select" onchange="addOptionalRow()"
-      style="width:100%;background:#ffffff;border:1px solid var(--border);
+      style="width:100%;background:var(--bg);border:1px solid var(--border);
       border-radius:10px;color:var(--text);font-size:16px;
       padding:12px 14px;outline:none;font-family:inherit;margin-bottom:10px">
       <option value="">+ 추가 입력 선택...</option>
@@ -569,30 +565,13 @@ async function showLoginScreen() {
     const data = await res.json();
     if (data.users) {
       users = data.users;
-      populateNameSelect(users);
+      const sel = document.getElementById("login-name-select");
+      sel.innerHTML = '<option value="">이름을 선택하세요...</option>';
+      users.forEach(u => {
+        sel.innerHTML += `<option value="${u}">${u}</option>`;
+      });
     }
   } catch(e) {}
-}
-
-function populateNameSelect(userList) {
-  const sel = document.getElementById("login-name-select");
-  sel.innerHTML = '<option value="">이름을 선택하세요...</option>';
-  userList.forEach(u => {
-    sel.innerHTML += `<option value="${u}">${u}</option>`;
-  });
-  sel.innerHTML += '<option value="__new__">✨ 신규 참여</option>';
-}
-
-function onNameSelect() {
-  const sel = document.getElementById("login-name-select");
-  const newRow = document.getElementById("new-name-row");
-  if (sel.value === "__new__") {
-    newRow.style.display = "block";
-    document.getElementById("login-name-input").focus();
-  } else {
-    newRow.style.display = "none";
-  }
-  document.getElementById("login-error").style.display = "none";
 }
 
 async function verifyLogin(name, pw) {
@@ -604,19 +583,9 @@ async function verifyLogin(name, pw) {
 }
 
 async function doLogin() {
-  const sel = document.getElementById("login-name-select");
-  let name = sel.value;
-  if (name === "__new__") {
-    name = document.getElementById("login-name-input").value.trim();
-    if (!name) { showLoginError("이름을 입력해주세요."); return; }
-    // 신규 참여 → 등록 화면으로 이동 (이름 미리 채워줌)
-    document.getElementById("reg-name").value = name;
-    showRegister();
-    return;
-  }
+  const name = document.getElementById("login-name-select").value.trim();
   const pw = document.getElementById("login-pw").value.trim();
-  if (!name) { showLoginError("이름을 선택해주세요."); return; }
-  if (!pw) { showLoginError("비밀번호를 입력해주세요."); return; }
+  if (!name || !pw) { showLoginError("이름과 비밀번호를 입력해주세요."); return; }
 
   try {
     const res = await fetch(`${API}?action=verifyLogin&name=${encodeURIComponent(name)}&pw=${encodeURIComponent(pw)}`);
@@ -650,8 +619,6 @@ async function doRegister() {
     if (data.success) {
       localStorage.setItem('loginInfo', JSON.stringify({author:name, pw:pw}));
       author = name;
-      // 사용자 목록에 추가
-      if (!users.includes(name)) { users.push(name); populateNameSelect(users); }
       document.getElementById("login-screen").classList.remove("show");
       startApp();
     } else {
@@ -668,12 +635,8 @@ function doLogout() {
   examCount = 0;
   todayData = getTodayData();
   document.getElementById("login-screen").classList.add("show");
+  // 설정탭 숨기기
   document.getElementById("settings-tab-btn").style.display="none";
-  // 드롭다운 초기화
-  document.getElementById("login-name-select").value = "";
-  document.getElementById("new-name-row").style.display = "none";
-  document.getElementById("login-pw").value = "";
-  document.getElementById("login-error").style.display = "none";
   showLogin();
   goHome();
 }
