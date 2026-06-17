@@ -253,6 +253,12 @@ function drawChart(){
   var yLeft  = calcPayoff(state.legs, xMin);
   var yRight = calcPayoff(state.legs, xMax);
 
+  // 차트 데이터에서 최솟값 위치 찾기
+  var minY = pts[0].y, minX = pts[0].x;
+  for(var mi=1; mi<pts.length; mi++){
+    if(pts[mi].y < minY){ minY=pts[mi].y; minX=pts[mi].x; }
+  }
+
   // 전체 표시 목록 구성
   var inflections = [];
   inflections.push({x:xMin, y:yLeft, isEdge:true});
@@ -260,11 +266,15 @@ function drawChart(){
   kUniq.forEach(function(k){   inflections.push({x:k, y:calcPayoff(state.legs,k), isEdge:false}); });
   inflections.push({x:xMax, y:yRight, isEdge:true});
 
+  // 최저점이 기존 변곡점과 다른 Y값이면 추가
+  var minAlreadyIn = inflections.some(function(p){ return Math.abs(p.y - minY) < 0.01; });
+  if(!minAlreadyIn) inflections.push({x:minX, y:minY, isEdge:false, noXLabel:true});
+
   // Y값 포맷
   function fmtY(v){
     var yv = state.unit==="pt" ? v : v*MULT;
     if(state.unit==="pt") return (yv>=0?"+":"")+yv.toFixed(1);
-    if(Math.abs(yv)>=1e8) return (yv>=0?"+":"")+(yv/1e8).toFixed(1)+"억";
+    // 만원 단위로 통일 (억 단위 사용 안함 - 좌측 눈금과 동일 단위)
     if(Math.abs(yv)>=1e4) return (yv>=0?"+":"")+(yv/1e4).toFixed(0)+"만";
     return (yv>=0?"+":"")+yv.toFixed(0);
   }
@@ -274,26 +284,33 @@ function drawChart(){
 
   // Y레이블 겹침 방지: 사용된 Y위치 추적
   var usedYPositions = []; // {y, col}
+  var drawnHLines = []; // 이미 그려진 가로선 Y값(실제 데이터값)
 
   inflections.forEach(function(pt){
     var ix = px(pt.x), iy = py(pt.y);
     ctx.save();
 
-    // 세로 점선 (노란색)
-    ctx.strokeStyle="#f5c842"; ctx.lineWidth=1; ctx.setLineDash([4,3]);
-    ctx.beginPath(); ctx.moveTo(ix,PAD.top); ctx.lineTo(ix,PAD.top+ch); ctx.stroke();
+    // 세로 점선 (노란색) - 시작점(Y축 위)은 생략
+    if(!(pt.isEdge && pt.x===xMin)){
+      ctx.strokeStyle="#f5c842"; ctx.lineWidth=1; ctx.setLineDash([4,3]);
+      ctx.beginPath(); ctx.moveTo(ix,PAD.top); ctx.lineTo(ix,PAD.top+ch); ctx.stroke();
+    }
 
-    // 가로 점선 (빨간색) - Y축 전체 폭으로 (차트 왼쪽 끝 ~ 오른쪽 끝)
-    ctx.strokeStyle="#f87171"; ctx.lineWidth=1; ctx.setLineDash([4,3]);
-    ctx.beginPath(); ctx.moveTo(PAD.left, iy); ctx.lineTo(PAD.left+cw, iy); ctx.stroke();
-    ctx.setLineDash([]);
+    // 가로 점선 (빨간색) - 동일 Y값이면 생략
+    var dupHLine = drawnHLines.some(function(v){ return Math.abs(v - pt.y) < 0.01; });
+    if(!dupHLine){
+      ctx.strokeStyle="#f87171"; ctx.lineWidth=1; ctx.setLineDash([4,3]);
+      ctx.beginPath(); ctx.moveTo(PAD.left, iy); ctx.lineTo(PAD.left+cw, iy); ctx.stroke();
+      ctx.setLineDash([]);
+      drawnHLines.push(pt.y);
+    }
 
     // 교차점 원
     ctx.fillStyle="#ffffff";
     ctx.beginPath(); ctx.arc(ix,iy,3.5,0,Math.PI*2); ctx.fill();
 
     // X값 레이블 (노란, 하단)
-    var showXLabel = !(pt.isEdge && pt.x===xMax && skipRightXLabel);
+    var showXLabel = !pt.noXLabel && !(pt.isEdge && pt.x===xMax && skipRightXLabel);
     if(showXLabel){
       ctx.fillStyle="#f5c842"; ctx.font="bold 10px 'Noto Sans KR',sans-serif"; ctx.textAlign="center";
       var tx=ix;
@@ -303,6 +320,8 @@ function drawChart(){
       ctx.fillText(pt.x.toFixed(1), tx, PAD.top+ch+tyOffset);
     }
 
+    // Y값 레이블 - 동일 Y값이면 생략
+    if(dupHLine){ ctx.restore(); return; }
     // Y값 레이블 - 실제 Y위치에 고정, Y축 왼쪽에 표시
     // 같은 높이 근처에 이미 레이블이 있으면 한 칸 더 왼쪽 열에 표시
     ctx.fillStyle="#f87171"; ctx.font="bold 10px 'Noto Sans KR',sans-serif";
