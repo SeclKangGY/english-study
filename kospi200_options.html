@@ -250,10 +250,14 @@ function drawChart(){
   }
 
   // 시작점·끝점
-  var yLeft  = calcPayoff(state.legs, xMin);
-  var yRight = calcPayoff(state.legs, xMax);
+  var yLeftPt  = calcPayoff(state.legs, xMin);
+  var yRightPt = calcPayoff(state.legs, xMax);
+  // 차트 단위(pts.y와 동일)로 변환
+  var yLeft  = state.unit==="pt" ? yLeftPt  : yLeftPt  * MULT;
+  var yRight = state.unit==="pt" ? yRightPt : yRightPt * MULT;
 
-  // 차트 데이터에서 최솟값 위치 찾기
+  // 차트 데이터에서 최솟값 위치 찾기 (포인트 기준으로 별도 계산)
+  // 최솟값: pts.y 기준(차트 단위)으로 찾기
   var minY = pts[0].y, minX = pts[0].x;
   for(var mi=1; mi<pts.length; mi++){
     if(pts[mi].y < minY){ minY=pts[mi].y; minX=pts[mi].x; }
@@ -262,8 +266,14 @@ function drawChart(){
   // 전체 표시 목록 구성
   var inflections = [];
   inflections.push({x:xMin, y:yLeft, isEdge:true});
-  extraKs.forEach(function(k){ inflections.push({x:k, y:calcPayoff(state.legs,k), isEdge:false}); });
-  kUniq.forEach(function(k){   inflections.push({x:k, y:calcPayoff(state.legs,k), isEdge:false}); });
+  extraKs.forEach(function(k){
+    var v=calcPayoff(state.legs,k);
+    inflections.push({x:k, y:state.unit==="pt"?v:v*MULT, isEdge:false});
+  });
+  kUniq.forEach(function(k){
+    var v=calcPayoff(state.legs,k);
+    inflections.push({x:k, y:state.unit==="pt"?v:v*MULT, isEdge:false});
+  });
   inflections.push({x:xMax, y:yRight, isEdge:true});
 
   // 최저점이 기존 변곡점과 다른 Y값이면 추가
@@ -271,16 +281,16 @@ function drawChart(){
   if(!minAlreadyIn) inflections.push({x:minX, y:minY, isEdge:false, noXLabel:true});
 
   // Y값 포맷
+  // fmtY: pt.y는 차트와 동일 단위 (포인트 or 원화)
   function fmtY(v){
-    var yv = state.unit==="pt" ? v : v*MULT;
-    if(state.unit==="pt") return (yv>=0?"+":"")+yv.toFixed(1);
-    // 만원 단위로 통일 (억 단위 사용 안함 - 좌측 눈금과 동일 단위)
-    if(Math.abs(yv)>=1e4) return (yv>=0?"+":"")+(yv/1e4).toFixed(0)+"만";
-    return (yv>=0?"+":"")+yv.toFixed(0);
+    if(state.unit==="pt") return (v>=0?"+":"")+v.toFixed(1)+"pt";
+    // 원화(원 단위) → 만원으로 표시
+    if(Math.abs(v)>=1e4) return (v>=0?"+":"")+(v/1e4).toFixed(0)+"만";
+    return (v>=0?"+":"")+v.toFixed(0)+"원";
   }
 
   // 끝점 Y값 같으면 우측(xMax)의 노란 X레이블 생략
-  var skipRightXLabel = (Math.abs(yLeft - yRight) < 0.01);
+  var skipRightXLabel = (Math.abs(yLeftPt - yRightPt) < 0.01);
 
   // Y레이블 겹침 방지: 사용된 Y위치 추적
   var usedYPositions = []; // {y, col}
