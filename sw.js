@@ -1,4 +1,4 @@
-const CACHE = "kospi200-v1";
+const CACHE = "kospi200-v2";
 const ASSETS = [
   "./kospi200_options.html",
   "./manifest.json"
