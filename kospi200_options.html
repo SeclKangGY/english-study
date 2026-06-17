@@ -297,14 +297,19 @@ function drawChart(){
       var tx=ix;
       if(tx<PAD.left+26) tx=PAD.left+26;
       if(tx>PAD.left+cw-26) tx=PAD.left+cw-26;
-      ctx.fillText(pt.x.toFixed(1), tx, PAD.top+ch+13);
+      // 끝점은 두번째 줄에 표시 (눈금 숫자와 겹침 방지)
+      var tyOffset = pt.isEdge ? 26 : 13;
+      ctx.fillText(pt.x.toFixed(1), tx, PAD.top+ch+tyOffset);
     }
 
-    // Y값 레이블 (빨간, 우측)
+    // Y값 레이블 (빨간, 우측) - 0선 레이블과 겹침 방지
     ctx.fillStyle="#f87171"; ctx.font="bold 10px 'Noto Sans KR',sans-serif"; ctx.textAlign="left";
     var ty=iy-4;
     if(ty<PAD.top+8) ty=PAD.top+8;
     if(ty>PAD.top+ch-4) ty=PAD.top+ch-4;
+    // 0선(py(0)) 근처면 위로 올려서 겹침 방지
+    var zeroY = py(0);
+    if(Math.abs(ty - zeroY) < 10) ty = zeroY - 12;
     ctx.fillText(fmtY(pt.y), PAD.left+cw+4, ty);
 
     ctx.restore();
