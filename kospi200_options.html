@@ -303,16 +303,12 @@ function drawChart(){
       ctx.fillText(pt.x.toFixed(1), tx, PAD.top+ch+tyOffset);
     }
 
-    // Y값 레이블 - 가로선 위에 직접 표시 (겹침 방지)
+    // Y값 레이블 - 좌측 Y축에 표시 (겹침 방지)
     ctx.fillStyle="#f87171"; ctx.font="bold 10px 'Noto Sans KR',sans-serif";
     var yLblText = fmtY(pt.y);
-    var yLblW = ctx.measureText(yLblText).width;
-    // X위치: 교차점 우측에 표시, 차트 우측 경계 넘으면 좌측에
-    var lx = ix + 5;
-    if(lx + yLblW > PAD.left + cw - 4) lx = ix - yLblW - 5;
     // Y위치: 가로선 바로 위
     var ly = iy - 3;
-    // 겹침 방지
+    // 겹침 방지: 이미 사용된 위치와 겹치면 위로 밀기
     var MIN_GAP = 12;
     var conflict = true; var tries2 = 0;
     while(conflict && tries2 < 15){
@@ -326,8 +322,9 @@ function drawChart(){
     }
     if(ly < PAD.top+8) ly = PAD.top+8;
     usedYPositions.push(ly);
-    ctx.textAlign="left";
-    ctx.fillText(yLblText, lx, ly);
+    // Y축 왼쪽 바깥에 표시 (빨간색이라 기존 회색 눈금과 구분됨)
+    ctx.textAlign="right";
+    ctx.fillText(yLblText, PAD.left - 5, ly);
 
     ctx.restore();
   });
