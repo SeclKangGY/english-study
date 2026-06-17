@@ -114,9 +114,10 @@ var state = {
 function autoRng(){
   var ks = state.legs.map(function(l){return l.k;}).filter(function(k){return k!==null;});
   var ctr = autoCtr();
-  // 행사가 스프레드의 2배 + 중심의 15%, 최소 중심의 10%
   var spread = ks.length>=2 ? (Math.max.apply(null,ks)-Math.min.apply(null,ks))*2 : 0;
-  return Math.max(spread, ctr*0.30);
+  // 기본 범위 30% + 양끝 여백 10% 추가 → 끝점이 경계에 안 걸림
+  var base = Math.max(spread, ctr*0.30);
+  return base * 1.20;
 }
 
 function autoCtr(){
@@ -231,6 +232,83 @@ function drawChart(){
       ctx.restore();
     }
   }
+
+  // ── 변곡점 (행사가) 십자선 표시 ──────────────────────────
+  var kpts = state.legs
+    .filter(function(l){ return l.k!==null && l.p!==null; })
+    .map(function(l){ return l.k; });
+  // 행사가 중복 제거 후 정렬
+  var kUniq = kpts.filter(function(v,i,a){ return a.indexOf(v)===i; });
+  kUniq.sort(function(a,b){return a-b;});
+
+  // 행사가가 1개면 좌·우 사이 중간점 2개 추가
+  var extraKs = [];
+  if(kUniq.length===1){
+    var k0 = kUniq[0];
+    extraKs.push((xMin + k0) / 2); // 좌측 중간
+    extraKs.push((k0 + xMax) / 2); // 우측 중간
+  }
+
+  // 시작점·끝점
+  var yLeft  = calcPayoff(state.legs, xMin);
+  var yRight = calcPayoff(state.legs, xMax);
+
+  // 전체 표시 목록 구성
+  var inflections = [];
+  inflections.push({x:xMin, y:yLeft, isEdge:true});
+  extraKs.forEach(function(k){ inflections.push({x:k, y:calcPayoff(state.legs,k), isEdge:false}); });
+  kUniq.forEach(function(k){   inflections.push({x:k, y:calcPayoff(state.legs,k), isEdge:false}); });
+  inflections.push({x:xMax, y:yRight, isEdge:true});
+
+  // Y값 포맷
+  function fmtY(v){
+    var yv = state.unit==="pt" ? v : v*MULT;
+    if(state.unit==="pt") return (yv>=0?"+":"")+yv.toFixed(1);
+    if(Math.abs(yv)>=1e8) return (yv>=0?"+":"")+(yv/1e8).toFixed(1)+"억";
+    if(Math.abs(yv)>=1e4) return (yv>=0?"+":"")+(yv/1e4).toFixed(0)+"만";
+    return (yv>=0?"+":"")+yv.toFixed(0);
+  }
+
+  // 끝점 Y값 같으면 우측(xMax)의 노란 X레이블 생략
+  var skipRightXLabel = (Math.abs(yLeft - yRight) < 0.01);
+
+  inflections.forEach(function(pt){
+    var ix = px(pt.x), iy = py(pt.y);
+    ctx.save();
+
+    // 세로 점선 (노란색)
+    ctx.strokeStyle="#f5c842"; ctx.lineWidth=1; ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(ix,PAD.top); ctx.lineTo(ix,PAD.top+ch); ctx.stroke();
+
+    // 가로 점선 (빨간색)
+    ctx.strokeStyle="#f87171"; ctx.lineWidth=1; ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(PAD.left,iy); ctx.lineTo(PAD.left+cw,iy); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // 교차점 원
+    ctx.fillStyle="#ffffff";
+    ctx.beginPath(); ctx.arc(ix,iy,3.5,0,Math.PI*2); ctx.fill();
+
+    // X값 레이블 (노란, 하단)
+    // 끝점 Y값 동일 → 우측 끝점 X레이블 생략
+    var showXLabel = !(pt.isEdge && pt.x===xMax && skipRightXLabel);
+    if(showXLabel){
+      ctx.fillStyle="#f5c842"; ctx.font="bold 10px 'Noto Sans KR',sans-serif"; ctx.textAlign="center";
+      var tx=ix;
+      if(tx<PAD.left+26) tx=PAD.left+26;
+      if(tx>PAD.left+cw-26) tx=PAD.left+cw-26;
+      ctx.fillText(pt.x.toFixed(1), tx, PAD.top+ch+13);
+    }
+
+    // Y값 레이블 (빨간, 우측)
+    ctx.fillStyle="#f87171"; ctx.font="bold 10px 'Noto Sans KR',sans-serif"; ctx.textAlign="left";
+    var ty=iy-4;
+    if(ty<PAD.top+8) ty=PAD.top+8;
+    if(ty>PAD.top+ch-4) ty=PAD.top+ch-4;
+    ctx.fillText(fmtY(pt.y), PAD.left+cw+4, ty);
+
+    ctx.restore();
+  });
 
   // payoff line
   ctx.beginPath();
