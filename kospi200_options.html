@@ -272,6 +272,31 @@ function drawChart(){
   // 끝점 Y값 같으면 우측(xMax)의 노란 X레이블 생략
   var skipRightXLabel = (Math.abs(yLeft - yRight) < 0.01);
 
+  // Y레이블 겹침 방지: 사용된 Y위치 추적
+  var usedYPositions = [];
+  function findFreeY(iy){
+    var MIN_GAP = 12;
+    var candidate = iy;
+    var maxTries = 20;
+    for(var t=0; t<maxTries; t++){
+      var conflict = false;
+      for(var u=0; u<usedYPositions.length; u++){
+        if(Math.abs(usedYPositions[u] - candidate) < MIN_GAP){
+          conflict = true;
+          // 위아래로 교대로 밀기
+          candidate = iy + (t%2===0 ? 1 : -1) * Math.ceil((t+1)/2) * MIN_GAP;
+          break;
+        }
+      }
+      if(!conflict) break;
+    }
+    // 차트 범위 안으로 클램핑
+    if(candidate < PAD.top+8) candidate = PAD.top+8;
+    if(candidate > PAD.top+ch-4) candidate = PAD.top+ch-4;
+    usedYPositions.push(candidate);
+    return candidate;
+  }
+
   inflections.forEach(function(pt){
     var ix = px(pt.x), iy = py(pt.y);
     ctx.save();
@@ -290,23 +315,25 @@ function drawChart(){
     ctx.beginPath(); ctx.arc(ix,iy,3.5,0,Math.PI*2); ctx.fill();
 
     // X값 레이블 (노란, 하단)
-    // 끝점 Y값 동일 → 우측 끝점 X레이블 생략
     var showXLabel = !(pt.isEdge && pt.x===xMax && skipRightXLabel);
     if(showXLabel){
       ctx.fillStyle="#f5c842"; ctx.font="bold 10px 'Noto Sans KR',sans-serif"; ctx.textAlign="center";
       var tx=ix;
       if(tx<PAD.left+26) tx=PAD.left+26;
       if(tx>PAD.left+cw-26) tx=PAD.left+cw-26;
-      // 끝점은 두번째 줄에 표시 (눈금 숫자와 겹침 방지)
       var tyOffset = pt.isEdge ? 26 : 13;
       ctx.fillText(pt.x.toFixed(1), tx, PAD.top+ch+tyOffset);
     }
 
-    // Y값 레이블 (빨간, 우측) - 0선 레이블과 겹침 방지
+    // Y값 레이블 (빨간, 우측) - 겹침 방지 적용
     ctx.fillStyle="#f87171"; ctx.font="bold 10px 'Noto Sans KR',sans-serif"; ctx.textAlign="left";
-    var ty=iy-4;
-    if(ty<PAD.top+8) ty=PAD.top+8;
-    if(ty>PAD.top+ch-4) ty=PAD.top+ch-4;
+    var ty = findFreeY(iy-4);
+    // 실제 위치와 다르면 점선으로 연결
+    if(Math.abs(ty - (iy-4)) > 2){
+      ctx.strokeStyle="#f8717166"; ctx.lineWidth=0.5; ctx.setLineDash([2,2]);
+      ctx.beginPath(); ctx.moveTo(PAD.left+cw+2, iy); ctx.lineTo(PAD.left+cw+2, ty+4); ctx.stroke();
+      ctx.setLineDash([]);
+    }
     ctx.fillText(fmtY(pt.y), PAD.left+cw+4, ty);
 
     ctx.restore();
