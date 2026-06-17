@@ -189,7 +189,7 @@ function drawChart(){
   for(var gi=0;gi<=4;gi++){
     var gy = yMin + gi*(yMax-yMin)/4;
     ctx.beginPath(); ctx.moveTo(PAD.left,py(gy)); ctx.lineTo(PAD.left+cw,py(gy)); ctx.stroke();
-    var lbl = state.unit==="pt"?gy.toFixed(1):(gy/1e4).toFixed(0)+"만";
+    var lbl = state.unit==="pt"?gy.toFixed(1):(gy/1e4).toFixed(0);
     ctx.fillStyle="#4a7a99"; ctx.font="10px 'Noto Sans KR',sans-serif";
     ctx.textAlign="right"; ctx.fillText(lbl, PAD.left-5, py(gy)+3);
   }
@@ -281,10 +281,9 @@ function drawChart(){
   if(!minAlreadyIn) inflections.push({x:minX, y:minY, isEdge:false, noXLabel:true});
 
   // Y값 포맷
-  // fmtY: pt.y는 차트와 동일 단위 (포인트 or 원화)
+  // fmtY: 단위 표시 없이 숫자만 (Y축 눈금과 동일 형식)
   function fmtY(v){
     if(state.unit==="pt") return (v>=0?"+":"")+v.toFixed(1);
-    // 원화(원 단위) → 만 단위 숫자만 (단위는 Y축 눈금에 이미 표시됨)
     if(Math.abs(v)>=1e4) return (v>=0?"+":"")+(v/1e4).toFixed(0);
     return (v>=0?"+":"")+v.toFixed(0);
   }
