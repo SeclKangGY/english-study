@@ -283,10 +283,10 @@ function drawChart(){
   // Y값 포맷
   // fmtY: pt.y는 차트와 동일 단위 (포인트 or 원화)
   function fmtY(v){
-    if(state.unit==="pt") return (v>=0?"+":"")+v.toFixed(1)+"pt";
-    // 원화(원 단위) → 만원으로 표시
-    if(Math.abs(v)>=1e4) return (v>=0?"+":"")+(v/1e4).toFixed(0)+"만";
-    return (v>=0?"+":"")+v.toFixed(0)+"원";
+    if(state.unit==="pt") return (v>=0?"+":"")+v.toFixed(1);
+    // 원화(원 단위) → 만 단위 숫자만 (단위는 Y축 눈금에 이미 표시됨)
+    if(Math.abs(v)>=1e4) return (v>=0?"+":"")+(v/1e4).toFixed(0);
+    return (v>=0?"+":"")+v.toFixed(0);
   }
 
   // 끝점 Y값 같으면 우측(xMax)의 노란 X레이블 생략
