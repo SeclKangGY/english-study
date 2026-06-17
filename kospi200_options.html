@@ -274,28 +274,6 @@ function drawChart(){
 
   // Y레이블 겹침 방지: 사용된 Y위치 추적
   var usedYPositions = [];
-  function findFreeY(iy){
-    var MIN_GAP = 12;
-    var candidate = iy;
-    var maxTries = 20;
-    for(var t=0; t<maxTries; t++){
-      var conflict = false;
-      for(var u=0; u<usedYPositions.length; u++){
-        if(Math.abs(usedYPositions[u] - candidate) < MIN_GAP){
-          conflict = true;
-          // 위아래로 교대로 밀기
-          candidate = iy + (t%2===0 ? 1 : -1) * Math.ceil((t+1)/2) * MIN_GAP;
-          break;
-        }
-      }
-      if(!conflict) break;
-    }
-    // 차트 범위 안으로 클램핑
-    if(candidate < PAD.top+8) candidate = PAD.top+8;
-    if(candidate > PAD.top+ch-4) candidate = PAD.top+ch-4;
-    usedYPositions.push(candidate);
-    return candidate;
-  }
 
   inflections.forEach(function(pt){
     var ix = px(pt.x), iy = py(pt.y);
@@ -325,16 +303,31 @@ function drawChart(){
       ctx.fillText(pt.x.toFixed(1), tx, PAD.top+ch+tyOffset);
     }
 
-    // Y값 레이블 (빨간, 우측) - 겹침 방지 적용
-    ctx.fillStyle="#f87171"; ctx.font="bold 10px 'Noto Sans KR',sans-serif"; ctx.textAlign="left";
-    var ty = findFreeY(iy-4);
-    // 실제 위치와 다르면 점선으로 연결
-    if(Math.abs(ty - (iy-4)) > 2){
-      ctx.strokeStyle="#f8717166"; ctx.lineWidth=0.5; ctx.setLineDash([2,2]);
-      ctx.beginPath(); ctx.moveTo(PAD.left+cw+2, iy); ctx.lineTo(PAD.left+cw+2, ty+4); ctx.stroke();
-      ctx.setLineDash([]);
+    // Y값 레이블 - 가로선 위에 직접 표시 (겹침 방지)
+    ctx.fillStyle="#f87171"; ctx.font="bold 10px 'Noto Sans KR',sans-serif";
+    var yLblText = fmtY(pt.y);
+    var yLblW = ctx.measureText(yLblText).width;
+    // X위치: 교차점 우측에 표시, 차트 우측 경계 넘으면 좌측에
+    var lx = ix + 5;
+    if(lx + yLblW > PAD.left + cw - 4) lx = ix - yLblW - 5;
+    // Y위치: 가로선 바로 위
+    var ly = iy - 3;
+    // 겹침 방지
+    var MIN_GAP = 12;
+    var conflict = true; var tries2 = 0;
+    while(conflict && tries2 < 15){
+      conflict = false; tries2++;
+      for(var u=0; u<usedYPositions.length; u++){
+        if(Math.abs(usedYPositions[u] - ly) < MIN_GAP){
+          ly = usedYPositions[u] - MIN_GAP;
+          conflict = true; break;
+        }
+      }
     }
-    ctx.fillText(fmtY(pt.y), PAD.left+cw+4, ty);
+    if(ly < PAD.top+8) ly = PAD.top+8;
+    usedYPositions.push(ly);
+    ctx.textAlign="left";
+    ctx.fillText(yLblText, lx, ly);
 
     ctx.restore();
   });
