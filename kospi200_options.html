@@ -307,9 +307,6 @@ function drawChart(){
     var ty=iy-4;
     if(ty<PAD.top+8) ty=PAD.top+8;
     if(ty>PAD.top+ch-4) ty=PAD.top+ch-4;
-    // 0선(py(0)) 근처면 위로 올려서 겹침 방지
-    var zeroY = py(0);
-    if(Math.abs(ty - zeroY) < 10) ty = zeroY - 12;
     ctx.fillText(fmtY(pt.y), PAD.left+cw+4, ty);
 
     ctx.restore();
