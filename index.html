@@ -13,18 +13,18 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 :root {
-  --bg: #080b14; --card: #0d1120;
-  --border: #1e2640;
-  --accent: #3b7fff; --accent-g: rgba(59,127,255,0.12);
-  --yellow: #fbbf24; --yellow-g: rgba(251,191,36,0.12);
-  --green: #10b981; --green-g: rgba(16,185,129,0.12);
-  --red: #ef4444; --red-g: rgba(239,68,68,0.12);
-  --text: #e2e8f0; --muted: #64748b; --dim: #334155;
+  --bg: #f0f8ff; --card: #ffffff;
+  --border: #b8d4f0;
+  --accent: #1a6fd4; --accent-g: rgba(26,111,212,0.10);
+  --yellow: #d97706; --yellow-g: rgba(217,119,6,0.10);
+  --green: #059669; --green-g: rgba(5,150,105,0.10);
+  --red: #dc2626; --red-g: rgba(220,38,38,0.10);
+  --text: #1e293b; --muted: #475569; --dim: #94a3b8;
 }
 body {
   background: var(--bg); color: var(--text);
   font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
-  max-width: 480px; margin: 0 auto; min-height: 100vh;
+  max-width: 100%; margin: 0 auto; min-height: 100vh;
   overflow-x: hidden;
 }
 #header {
@@ -144,18 +144,19 @@ input:focus, textarea:focus { border-color: var(--accent); }
   margin-bottom: 14px; line-height: 1.3;
 }
 .blank-input-inline {
-  display: inline-block; background: transparent; border: none;
-  color: var(--yellow); font-size: 22px; font-weight: 700;
+  display: inline-block; background: #e0f0ff; border: none;
+  border-bottom: 2px solid var(--accent);
+  color: var(--accent); font-size: 22px; font-weight: 700;
   font-family: inherit; outline: none; padding: 0 2px;
   margin: 0 2px; text-align: center; vertical-align: middle;
   letter-spacing: 2px;
 }
-.blank-input-inline:focus { color: var(--accent); }
-.blank-input-inline.hint-used { color: var(--red); }
+.blank-input-inline:focus { border-bottom-color: #1a6fd4; color: #1a6fd4; }
+.blank-input-inline.hint-used { border-bottom-color: var(--red); color: var(--red); }
 /* 로그인 화면 */
 #login-screen {
   display: none; position: fixed; inset: 0;
-  background: var(--bg); z-index: 200;
+  background: #f0f8ff; z-index: 200;
   padding: 40px 20px; overflow-y: auto;
 }
 #login-screen.show { display: block; }
