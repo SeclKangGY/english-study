@@ -160,7 +160,7 @@ function drawChart(){
   var ctx = canvas.getContext("2d");
   ctx.clearRect(0,0,W,H);
 
-  var PAD = {top:20,right:40,bottom:40,left:54};
+  var PAD = {top:20,right:40,bottom:40,left:90};
   var cw = W - PAD.left - PAD.right;
   var ch = H - PAD.top - PAD.bottom;
 
@@ -273,7 +273,7 @@ function drawChart(){
   var skipRightXLabel = (Math.abs(yLeft - yRight) < 0.01);
 
   // Y레이블 겹침 방지: 사용된 Y위치 추적
-  var usedYPositions = [];
+  var usedYPositions = []; // {y, col}
 
   inflections.forEach(function(pt){
     var ix = px(pt.x), iy = py(pt.y);
@@ -283,9 +283,9 @@ function drawChart(){
     ctx.strokeStyle="#f5c842"; ctx.lineWidth=1; ctx.setLineDash([4,3]);
     ctx.beginPath(); ctx.moveTo(ix,PAD.top); ctx.lineTo(ix,PAD.top+ch); ctx.stroke();
 
-    // 가로 점선 (빨간색)
+    // 가로 점선 (빨간색) - Y축 전체 폭으로 (차트 왼쪽 끝 ~ 오른쪽 끝)
     ctx.strokeStyle="#f87171"; ctx.lineWidth=1; ctx.setLineDash([4,3]);
-    ctx.beginPath(); ctx.moveTo(PAD.left,iy); ctx.lineTo(PAD.left+cw,iy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(PAD.left, iy); ctx.lineTo(PAD.left+cw, iy); ctx.stroke();
     ctx.setLineDash([]);
 
     // 교차점 원
@@ -303,28 +303,26 @@ function drawChart(){
       ctx.fillText(pt.x.toFixed(1), tx, PAD.top+ch+tyOffset);
     }
 
-    // Y값 레이블 - 좌측 Y축에 표시 (겹침 방지)
+    // Y값 레이블 - 실제 Y위치에 고정, Y축 왼쪽에 표시
+    // 같은 높이 근처에 이미 레이블이 있으면 한 칸 더 왼쪽 열에 표시
     ctx.fillStyle="#f87171"; ctx.font="bold 10px 'Noto Sans KR',sans-serif";
     var yLblText = fmtY(pt.y);
-    // Y위치: 가로선 바로 위
     var ly = iy - 3;
-    // 겹침 방지: 이미 사용된 위치와 겹치면 위로 밀기
-    var MIN_GAP = 12;
-    var conflict = true; var tries2 = 0;
-    while(conflict && tries2 < 15){
-      conflict = false; tries2++;
-      for(var u=0; u<usedYPositions.length; u++){
-        if(Math.abs(usedYPositions[u] - ly) < MIN_GAP){
-          ly = usedYPositions[u] - MIN_GAP;
-          conflict = true; break;
-        }
+    if(ly < PAD.top+8) ly = PAD.top+8;
+    // 몇번째 열에 표시할지 결정 (겹치면 한 열 더 왼쪽)
+    var col = 0;
+    var MIN_GAP = 11;
+    for(var u=0; u<usedYPositions.length; u++){
+      if(Math.abs(usedYPositions[u].y - ly) < MIN_GAP && usedYPositions[u].col === col){
+        col++;
+        u = -1; // 처음부터 다시 체크
       }
     }
-    if(ly < PAD.top+8) ly = PAD.top+8;
-    usedYPositions.push(ly);
-    // Y축 왼쪽 바깥에 표시 (빨간색이라 기존 회색 눈금과 구분됨)
+    usedYPositions.push({y:ly, col:col});
+    // col 0: PAD.left-5, col 1: PAD.left-5-55, col 2: ...
+    var colWidth = 52;
     ctx.textAlign="right";
-    ctx.fillText(yLblText, PAD.left - 5, ly);
+    ctx.fillText(yLblText, PAD.left - 5 - col*colWidth, ly);
 
     ctx.restore();
   });
