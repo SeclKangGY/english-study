@@ -1134,8 +1134,7 @@ function showHint() {
     if (document.activeElement===document.getElementById(`bi-${i}`)) { focusedIdx=i; break; }
   }
   if (focusedIdx===-1 && lastActiveBlank!==null && lastActiveBlank>=0 && lastActiveBlank<blankWords.length) {
-    const inp=document.getElementById(`bi-${lastActiveBlank}`);
-    if (inp && !inp.value.trim()) focusedIdx=lastActiveBlank;
+    focusedIdx = lastActiveBlank;
   }
   if (focusedIdx===-1) {
     // 그것도 없으면 첫번째 미입력 빈칸
