@@ -241,12 +241,12 @@ function drawChart(){
   var kUniq = kpts.filter(function(v,i,a){ return a.indexOf(v)===i; });
   kUniq.sort(function(a,b){return a-b;});
 
-  // 행사가가 1개면 좌·우 사이 중간점 2개 추가
+  // 행사가 1개면 좌·우 중간점 추가 (X축 구분용, Y값 표시 안함)
   var extraKs = [];
   if(kUniq.length===1){
     var k0 = kUniq[0];
-    extraKs.push((xMin + k0) / 2); // 좌측 중간
-    extraKs.push((k0 + xMax) / 2); // 우측 중간
+    extraKs.push((xMin + k0) / 2);
+    extraKs.push((k0 + xMax) / 2);
   }
 
   // 시작점·끝점
@@ -268,7 +268,7 @@ function drawChart(){
   inflections.push({x:xMin, y:yLeft, isEdge:true});
   extraKs.forEach(function(k){
     var v=calcPayoff(state.legs,k);
-    inflections.push({x:k, y:state.unit==="pt"?v:v*MULT, isEdge:false});
+    inflections.push({x:k, y:state.unit==="pt"?v:v*MULT, isEdge:false, noYLabel:true});
   });
   kUniq.forEach(function(k){
     var v=calcPayoff(state.legs,k);
@@ -281,10 +281,10 @@ function drawChart(){
   if(!minAlreadyIn) inflections.push({x:minX, y:minY, isEdge:false, noXLabel:true});
 
   // Y값 포맷
-  // fmtY: 단위 표시 없이 숫자만 (Y축 눈금과 동일 형식)
+  // fmtY: 단위 표시 없이 숫자만
   function fmtY(v){
-    if(state.unit==="pt") return (v>=0?"+":"")+v.toFixed(1);
-    if(Math.abs(v)>=1e4) return (v>=0?"+":"")+(v/1e4).toFixed(0);
+    if(state.unit==="pt") return (v>=0?"+":"")+v.toFixed(2); // pt는 소수점 2자리
+    if(Math.abs(v)>=1e4) return (v>=0?"+":"")+(v/1e4).toFixed(0); // 원화는 만원 정수
     return (v>=0?"+":"")+v.toFixed(0);
   }
 
@@ -333,6 +333,8 @@ function drawChart(){
     if(dupHLine){ ctx.restore(); return; }
     // Y값 레이블 - 실제 Y위치에 고정, Y축 왼쪽에 표시
     // 같은 높이 근처에 이미 레이블이 있으면 한 칸 더 왼쪽 열에 표시
+    // Y레이블 - 중간점은 생략
+    if(pt.noYLabel){ ctx.restore(); return; }
     ctx.fillStyle="#f87171"; ctx.font="bold 10px 'Noto Sans KR',sans-serif";
     var yLblText = fmtY(pt.y);
     var ly = iy - 3;
