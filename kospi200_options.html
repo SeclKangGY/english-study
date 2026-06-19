@@ -256,13 +256,6 @@ function drawChart(){
   var yLeft  = state.unit==="pt" ? yLeftPt  : yLeftPt  * MULT;
   var yRight = state.unit==="pt" ? yRightPt : yRightPt * MULT;
 
-  // 차트 데이터에서 최솟값 위치 찾기 (포인트 기준으로 별도 계산)
-  // 최솟값: pts.y 기준(차트 단위)으로 찾기
-  var minY = pts[0].y, minX = pts[0].x;
-  for(var mi=1; mi<pts.length; mi++){
-    if(pts[mi].y < minY){ minY=pts[mi].y; minX=pts[mi].x; }
-  }
-
   // 전체 표시 목록 구성
   var inflections = [];
   inflections.push({x:xMin, y:yLeft, isEdge:true});
@@ -275,10 +268,6 @@ function drawChart(){
     inflections.push({x:k, y:state.unit==="pt"?v:v*MULT, isEdge:false});
   });
   inflections.push({x:xMax, y:yRight, isEdge:true});
-
-  // 최저점이 기존 변곡점과 다른 Y값이면 추가
-  var minAlreadyIn = inflections.some(function(p){ return Math.abs(p.y - minY) < 0.01; });
-  if(!minAlreadyIn) inflections.push({x:minX, y:minY, isEdge:false, noXLabel:true});
 
   // Y값 포맷
   // fmtY: 단위 표시 없이 숫자만
