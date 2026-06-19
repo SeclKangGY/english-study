@@ -513,7 +513,7 @@ let settings = JSON.parse(localStorage.getItem('settings') || 'null') || {
 let currentTab = "exam";
 let vocabIdx = 0, vocabFiltered = [], vocabFlipped = false;
 let currentWord = null;
-let blankWords = [], hintUsed = [], lastActiveBlank = 0;
+let blankWords = [], hintUsed = [], lastActiveBlank = 0, hintInProgress = false;
 let pendingForm = null;
 let optionalData = {};
 let editingWord = null;
@@ -1110,9 +1110,11 @@ function nextQuestion() {
   document.getElementById("q-sentence").innerHTML=sentenceHtml;
   document.getElementById("q-translation").textContent=currentWord.ex_ko||"";
   lastActiveBlank = 0;
+  hintInProgress = false;
 }
 
 function autoMoveNext(inp, idx, total) {
+  if (hintInProgress) return;
   if (inp.value.length >= parseInt(inp.maxLength)) {
     let nextIdx = -1;
     for (let i=1;i<=total;i++) {
@@ -1157,9 +1159,12 @@ function showHint() {
     if (b.index === 0) {
       hintText = hintText[0].toUpperCase() + hintText.slice(1);
     }
+    hintInProgress = true;
     inp.value = hintText;
     inp.classList.add("hint-used");
     inp.focus();
+    lastActiveBlank = focusedIdx;
+    setTimeout(()=>{ hintInProgress = false; }, 0);
   }
 }
 
@@ -1389,3 +1394,4 @@ initLogin();
 </script>
 </body>
 </html>
+
