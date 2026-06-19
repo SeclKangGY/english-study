@@ -567,6 +567,12 @@ function updateSummary(){
     var sp=xMin+(i/300)*(xMax-xMin);
     ys.push(calcPayoff(state.legs,sp));
   }
+  // 행사가는 정확한 변곡점이므로 샘플링에 명시적으로 포함 (그리드 오차 방지)
+  state.legs.forEach(function(l){
+    if(l.k!==null && l.k>=xMin && l.k<=xMax){
+      ys.push(calcPayoff(state.legs, l.k));
+    }
+  });
   var mx=Math.max.apply(null,ys), mn=Math.min.apply(null,ys);
   var beps=[];
   for(var i=0;i<ys.length-1;i++){
