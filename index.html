@@ -381,13 +381,6 @@ input:focus, textarea:focus { border-color: var(--accent); }
     <button class="btn btn-muted flex1" onclick="vocabPrev()">← 이전</button>
     <button class="btn btn-accent flex1" onclick="vocabNext()">다음 →</button>
   </div>
-  <div class="card" style="text-align:center">
-    <div style="display:flex;justify-content:space-around">
-      <div><div id="v-cc" style="font-size:24px;font-weight:800;color:var(--green)">0</div><div style="font-size:13px;color:var(--muted)">정답</div></div>
-      <div><div id="v-wc" style="font-size:24px;font-weight:800;color:var(--red)">0</div><div style="font-size:13px;color:var(--muted)">오답</div></div>
-      <div><div id="v-pct" style="font-size:24px;font-weight:800;color:var(--yellow)">-</div><div style="font-size:13px;color:var(--muted)">정답률</div></div>
-    </div>
-  </div>
 </div>
 
 <!-- ── 탭: 통계 ── -->
@@ -564,6 +557,8 @@ async function initLogin() {
 
 async function showLoginScreen() {
   document.getElementById("login-screen").classList.add("show");
+  // 캐시된 목록으로 먼저 채우기
+  if (users.length > 0) populateNameSelect(users);
   try {
     const res = await fetch(`${API}?action=getUsers`);
     const data = await res.json();
@@ -576,8 +571,9 @@ async function showLoginScreen() {
 
 function populateNameSelect(userList) {
   const sel = document.getElementById("login-name-select");
+  const sorted = [...userList].sort((a, b) => a.localeCompare(b, 'ko'));
   sel.innerHTML = '<option value="">이름을 선택하세요...</option>';
-  userList.forEach(u => {
+  sorted.forEach(u => {
     sel.innerHTML += `<option value="${u}">${u}</option>`;
   });
   sel.innerHTML += '<option value="__new__">✨ 신규 참여</option>';
@@ -667,15 +663,13 @@ function doLogout() {
   examScore = {c:0, w:0};
   examCount = 0;
   todayData = getTodayData();
-  document.getElementById("login-screen").classList.add("show");
   document.getElementById("settings-tab-btn").style.display="none";
-  // 드롭다운 초기화
-  document.getElementById("login-name-select").value = "";
-  document.getElementById("new-name-row").style.display = "none";
   document.getElementById("login-pw").value = "";
   document.getElementById("login-error").style.display = "none";
+  document.getElementById("new-name-row").style.display = "none";
   showLogin();
   goHome();
+  showLoginScreen();
 }
 
 function showLogin() {
@@ -938,10 +932,6 @@ function renderCard() {
   if(w.syn) tags+=`<span style="background:var(--green-g);color:var(--green);border-radius:6px;padding:2px 8px;font-size:14px;font-weight:700;margin-right:5px">동의어</span><span style="font-size:14px;color:var(--muted)">${w.syn}</span><br>`;
   if(w.ant) tags+=`<span style="background:var(--red-g);color:var(--red);border-radius:6px;padding:2px 8px;font-size:14px;font-weight:700;margin-right:5px">반의어</span><span style="font-size:14px;color:var(--muted)">${w.ant}</span>`;
   document.getElementById("card-tags").innerHTML=tags;
-  document.getElementById("v-cc").textContent=s.cc;
-  document.getElementById("v-wc").textContent=s.wc;
-  const tot=s.cc+s.wc;
-  document.getElementById("v-pct").textContent=tot===0?"-":Math.round(s.cc/tot*100)+"%";
   const fc = document.getElementById("flashcard");
   if(!vocabFlipped) {
     document.getElementById("card-front").style.display="block";
@@ -1394,4 +1384,3 @@ initLogin();
 </script>
 </body>
 </html>
-
