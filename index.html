@@ -229,7 +229,8 @@ input:focus, textarea:focus { border-color: var(--accent); }
   <button class="tab-btn" onclick="selectTab('vocab')">단어장</button>
   <button class="tab-btn" onclick="selectTab('stats')">통계</button>
   <button class="tab-btn" onclick="selectTab('admin')">수정</button>
-  <button class="tab-btn" id="settings-tab-btn" onclick="selectTab('settings')" style="display:none">설정</button>
+  <button class="tab-btn" onclick="selectTab('mysettings')">설정</button>
+  <button class="tab-btn" id="settings-tab-btn" onclick="selectTab('settings')" style="display:none">관리자</button>
 </div>
 
 <!-- 뒤로가기 바 -->
@@ -485,6 +486,18 @@ input:focus, textarea:focus { border-color: var(--accent); }
     <button class="btn btn-green btn-full" onclick="saveSettings()">설정 저장</button>
   </div>
   <div class="card">
+    <div style="font-size:18px;font-weight:700;color:var(--accent);margin-bottom:14px">🔑 비밀번호 변경</div>
+    <div class="label">현재 비밀번호</div>
+    <input id="admin-pw-current" type="password" placeholder="현재 비밀번호 입력">
+    <div class="label">새 비밀번호</div>
+    <input id="admin-pw-new" type="password" placeholder="새 비밀번호 입력">
+    <div class="label">새 비밀번호 확인</div>
+    <input id="admin-pw-new2" type="password" placeholder="새 비밀번호 재입력"
+      onkeydown="if(event.key==='Enter')changePasswordAdmin()">
+    <button class="btn btn-accent btn-full" onclick="changePasswordAdmin()">비밀번호 변경</button>
+    <div id="admin-pw-status" style="font-size:14px;margin-top:8px;text-align:center;display:none"></div>
+  </div>
+  <div class="card">
     <div style="font-size:16px;font-weight:700;color:var(--muted);margin-bottom:12px">계정</div>
     <div style="font-size:15px;color:var(--text);margin-bottom:12px">
       현재 사용자: <span id="current-user-display2" style="color:var(--accent);font-weight:700"></span>
@@ -493,7 +506,30 @@ input:focus, textarea:focus { border-color: var(--accent); }
   </div>
 </div>
 
-<script>
+<!-- ── 탭: 내 설정 (모든 사용자) ── -->
+<div id="tab-mysettings" class="tab-section body">
+  <div class="card">
+    <div style="font-size:18px;font-weight:700;color:var(--accent);margin-bottom:14px">🔑 비밀번호 변경</div>
+    <div class="label">현재 비밀번호</div>
+    <input id="pw-current" type="password" placeholder="현재 비밀번호 입력">
+    <div class="label">새 비밀번호</div>
+    <input id="pw-new" type="password" placeholder="새 비밀번호 입력">
+    <div class="label">새 비밀번호 확인</div>
+    <input id="pw-new2" type="password" placeholder="새 비밀번호 재입력"
+      onkeydown="if(event.key==='Enter')changePassword()">
+    <button class="btn btn-accent btn-full" onclick="changePassword()">비밀번호 변경</button>
+    <div id="pw-status" style="font-size:14px;margin-top:8px;text-align:center;display:none"></div>
+  </div>
+  <div class="card" style="margin-top:10px">
+    <div style="font-size:16px;font-weight:700;color:var(--muted);margin-bottom:12px">계정</div>
+    <div style="font-size:15px;color:var(--text);margin-bottom:12px">
+      현재 사용자: <span id="current-user-display3" style="color:var(--accent);font-weight:700"></span>
+    </div>
+    <button class="btn btn-red btn-full" onclick="doLogout()">로그아웃</button>
+  </div>
+</div>
+
+
 const API = "https://script.google.com/macros/s/AKfycbzdWg-3MSqQX0eRC1aguQLELHlndYvEj7CiWdsew831myxi_g3Tb7rrXExDMXTA27tZ/exec";
 const ADMIN = "강규연"; // 운영자
 
@@ -691,14 +727,17 @@ function showRegError(msg) {
 
 // ── 앱 시작 ───────────────────────────────────────────────
 async function startApp() {
-  // 운영자면 설정탭 표시
+  // 운영자면 설정탭 표시 + 빈 비번 자동 초기화
   if (author === ADMIN) {
     document.getElementById("settings-tab-btn").style.display="flex";
+    try {
+      fetch(`${API}?action=initPasswords`); // 백그라운드 실행 (응답 기다리지 않음)
+    } catch(e) {}
   }
   document.getElementById("current-user-display").textContent = author;
   document.getElementById("current-user-display2").textContent = author;
+  document.getElementById("current-user-display3").textContent = author;
   await loadData();
-  // 기본 탭을 시험으로 설정 (헤더/탭바 표시 상태 유지)
   selectTab('exam');
   goHome();
 }
@@ -746,22 +785,33 @@ function updateHeader() {
 // ── 탭 전환 ───────────────────────────────────────────────
 function selectTab(tab) {
   currentTab = tab;
-  // 헤더/탭바 숨기고 뒤로가기 표시
   document.getElementById("header").classList.add("hidden");
   document.getElementById("tabbar").classList.add("hidden");
   document.getElementById("back-bar").classList.add("show");
-  const titles = {input:"표현 입력", exam:"시험", vocab:"단어장", stats:"통계", admin:"문장 수정", settings:"설정"};
+  const titles = {input:"표현 입력", exam:"시험", vocab:"단어장", stats:"통계", admin:"문장 수정", mysettings:"설정", settings:"관리자 설정"};
   document.getElementById("back-title").textContent = titles[tab] || "";
 
   document.querySelectorAll(".tab-section").forEach(s=>s.classList.remove("active"));
   document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
   document.getElementById("tab-"+tab).classList.add("active");
-  const tabBtns = ["input","exam","vocab","stats","admin","settings"];
+  const tabBtns = ["input","exam","vocab","stats","admin","mysettings","settings"];
   const idx = tabBtns.indexOf(tab);
   if (idx >= 0) document.querySelectorAll(".tab-btn")[idx]?.classList.add("active");
 
   if (tab==="stats") renderStats();
   if (tab==="exam") updateExamReady();
+  if (tab==="mysettings") {
+    document.getElementById("pw-current").value="";
+    document.getElementById("pw-new").value="";
+    document.getElementById("pw-new2").value="";
+    document.getElementById("pw-status").style.display="none";
+  }
+  if (tab==="settings") {
+    document.getElementById("admin-pw-current").value="";
+    document.getElementById("admin-pw-new").value="";
+    document.getElementById("admin-pw-new2").value="";
+    document.getElementById("admin-pw-status").style.display="none";
+  }
 }
 
 function goHome() {
@@ -775,6 +825,86 @@ function goHome() {
 }
 
 // ── 선택 입력 ─────────────────────────────────────────────
+// ── 비밀번호 변경 ─────────────────────────────────────────
+async function changePassword() {
+  const curPw = document.getElementById("pw-current").value;
+  const newPw = document.getElementById("pw-new").value;
+  const newPw2 = document.getElementById("pw-new2").value;
+  const statusEl = document.getElementById("pw-status");
+
+  if (!curPw) { showPwStatus("현재 비밀번호를 입력해주세요.", "var(--red)"); return; }
+  if (!newPw) { showPwStatus("새 비밀번호를 입력해주세요.", "var(--red)"); return; }
+  if (newPw !== newPw2) { showPwStatus("새 비밀번호가 일치하지 않습니다.", "var(--red)"); return; }
+  if (newPw.length < 4) { showPwStatus("비밀번호는 4자 이상으로 설정해주세요.", "var(--red)"); return; }
+
+  // 현재 비번 확인
+  try {
+    const verifyRes = await fetch(`${API}?action=verifyLogin&name=${encodeURIComponent(author)}&pw=${encodeURIComponent(curPw)}`);
+    const verifyData = await verifyRes.json();
+    if (!verifyData.valid) { showPwStatus("현재 비밀번호가 틀렸습니다.", "var(--red)"); return; }
+
+    // 비번 변경
+    const res = await fetch(API, { method:"POST",
+      body: JSON.stringify({ action:"changePassword", name:author, oldPw:curPw, newPw:newPw }) });
+    const data = await res.json();
+    if (data.success) {
+      // localStorage 업데이트
+      localStorage.setItem('loginInfo', JSON.stringify({author:author, pw:newPw}));
+      showPwStatus("✅ 비밀번호가 변경되었습니다!", "var(--green)");
+      document.getElementById("pw-current").value="";
+      document.getElementById("pw-new").value="";
+      document.getElementById("pw-new2").value="";
+    } else {
+      showPwStatus(data.error || "변경 실패. 다시 시도해주세요.", "var(--red)");
+    }
+  } catch(e) {
+    showPwStatus("네트워크 오류. 다시 시도해주세요.", "var(--red)");
+  }
+}
+
+function showPwStatus(msg, color) {
+  const el = document.getElementById("pw-status");
+  el.textContent = msg;
+  el.style.color = color;
+  el.style.display = "block";
+}
+
+async function changePasswordAdmin() {
+  const curPw = document.getElementById("admin-pw-current").value;
+  const newPw = document.getElementById("admin-pw-new").value;
+  const newPw2 = document.getElementById("admin-pw-new2").value;
+  if (!curPw) { showAdminPwStatus("현재 비밀번호를 입력해주세요.", "var(--red)"); return; }
+  if (!newPw) { showAdminPwStatus("새 비밀번호를 입력해주세요.", "var(--red)"); return; }
+  if (newPw !== newPw2) { showAdminPwStatus("새 비밀번호가 일치하지 않습니다.", "var(--red)"); return; }
+  if (newPw.length < 4) { showAdminPwStatus("비밀번호는 4자 이상으로 설정해주세요.", "var(--red)"); return; }
+  try {
+    const verifyRes = await fetch(`${API}?action=verifyLogin&name=${encodeURIComponent(author)}&pw=${encodeURIComponent(curPw)}`);
+    const verifyData = await verifyRes.json();
+    if (!verifyData.valid) { showAdminPwStatus("현재 비밀번호가 틀렸습니다.", "var(--red)"); return; }
+    const res = await fetch(API, { method:"POST",
+      body: JSON.stringify({ action:"changePassword", name:author, oldPw:curPw, newPw:newPw }) });
+    const data = await res.json();
+    if (data.success) {
+      localStorage.setItem('loginInfo', JSON.stringify({author:author, pw:newPw}));
+      showAdminPwStatus("✅ 비밀번호가 변경되었습니다!", "var(--green)");
+      document.getElementById("admin-pw-current").value="";
+      document.getElementById("admin-pw-new").value="";
+      document.getElementById("admin-pw-new2").value="";
+    } else {
+      showAdminPwStatus(data.error || "변경 실패. 다시 시도해주세요.", "var(--red)");
+    }
+  } catch(e) {
+    showAdminPwStatus("네트워크 오류. 다시 시도해주세요.", "var(--red)");
+  }
+}
+
+function showAdminPwStatus(msg, color) {
+  const el = document.getElementById("admin-pw-status");
+  el.textContent = msg;
+  el.style.color = color;
+  el.style.display = "block";
+}
+
 const OPTIONAL_LABELS = {
   pr:'발음', syn:'동의어', ant:'반의어',
   related:'관련표현', src:'출처', nar:'나레이션'
@@ -911,7 +1041,8 @@ function renderWordList() {
 function filterVocab() {
   const q = document.getElementById("search-input").value.trim().toLowerCase();
   vocabFiltered = q ? words.filter(w=>w.en.toLowerCase().includes(q)||w.ko.includes(q)) : [...words];
-  vocabIdx = 0; vocabFlipped = false; renderCard();
+  vocabIdx = q ? 0 : Math.floor(Math.random() * vocabFiltered.length);
+  vocabFlipped = false; renderCard();
 }
 
 function renderCard() {
