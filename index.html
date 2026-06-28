@@ -380,8 +380,10 @@ input:focus, textarea:focus { border-color: var(--accent); }
   </div>
   <div class="row" style="margin-bottom:14px">
     <button class="btn btn-muted flex1" onclick="vocabPrev()">← 이전</button>
-    <button class="btn btn-accent flex1" onclick="vocabNext()">다음 →</button>
+    <button class="btn btn-accent flex1" onclick="vocabRandom()">랜덤</button>
+    <button class="btn btn-muted flex1" onclick="vocabNext()">다음 →</button>
   </div>
+  <button class="btn btn-yellow btn-full" style="margin-bottom:14px" onclick="editFromVocab()">🔧 이 표현 수정</button>
 </div>
 
 <!-- ── 탭: 통계 ── -->
@@ -1084,6 +1086,39 @@ function renderCard() {
 function flipCard() { vocabFlipped=!vocabFlipped; renderCard(); }
 function vocabPrev() { if(vocabIdx>0){vocabIdx--;vocabFlipped=false;renderCard();} }
 function vocabNext() { if(vocabIdx<vocabFiltered.length-1){vocabIdx++;vocabFlipped=false;renderCard();} }
+function vocabRandom() {
+  if (vocabFiltered.length <= 1) return;
+  let newIdx;
+  do { newIdx = Math.floor(Math.random() * vocabFiltered.length); }
+  while (newIdx === vocabIdx);
+  vocabIdx = newIdx;
+  vocabFlipped = false;
+  renderCard();
+}
+
+function editFromVocab() {
+  if (vocabFiltered.length === 0) return;
+  const word = vocabFiltered[vocabIdx];
+  if (!word) return;
+  // 수정 탭으로 이동 후 해당 단어 항목 선택 화면 표시
+  selectTab('admin');
+  editingWord = word;
+  document.getElementById("admin-results").style.display="none";
+  document.getElementById("admin-field-select").style.display="block";
+  document.getElementById("admin-edit").style.display="none";
+  document.getElementById("edit-word-title").textContent = word.en + (word.ko ? ' · ' + word.ko : '');
+  document.getElementById("field-btn-list").innerHTML = EDIT_FIELDS.map(f => {
+    const val = word[f.key] || '';
+    const isKorean = ['ko','syn','ant'].includes(f.key);
+    const maxLen = isKorean ? 20 : 40;
+    const preview = val ? `<span style="font-size:13px;color:var(--muted);margin-left:8px">${val.slice(0,maxLen)}${val.length>maxLen?'...':''}</span>` : '';
+    return `<div class="card" style="cursor:pointer;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between"
+      onclick="selectEditField('${f.key}')">
+      <span style="font-weight:700;color:var(--accent)">${f.label}</span>
+      ${preview}
+    </div>`;
+  }).join("");
+}
 
 // ── 시험 탭 ───────────────────────────────────────────────
 function getExamPool() { return words.filter(w=>!isExcluded(w.en)); }
