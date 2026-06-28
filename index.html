@@ -414,21 +414,26 @@ input:focus, textarea:focus { border-color: var(--accent); }
     <div id="admin-result-list"></div>
   </div>
 
+  <!-- 항목 선택 화면 -->
+  <div id="admin-field-select" style="display:none">
+    <div class="card">
+      <div style="font-size:16px;font-weight:700;color:var(--accent);margin-bottom:4px" id="edit-word-title"></div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:14px">수정할 항목을 선택하세요</div>
+      <div id="field-btn-list"></div>
+      <button class="btn btn-muted btn-full" style="margin-top:8px" onclick="cancelEdit()">← 검색으로 돌아가기</button>
+    </div>
+  </div>
+
   <!-- 수정 화면 -->
   <div id="admin-edit" style="display:none">
     <div class="card">
-      <div style="font-size:16px;font-weight:700;color:var(--muted);margin-bottom:8px">수정 전 예문</div>
-      <div id="edit-orig-en" style="font-size:16px;line-height:1.5;color:var(--text);background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px"></div>
-      <div class="label">수정 후 예문</div>
-      <textarea id="edit-new-en" rows="3" style="resize:none;font-size:18px"></textarea>
-
-      <div style="font-size:16px;font-weight:700;color:var(--muted);margin-bottom:8px;margin-top:4px">수정 전 번역</div>
-      <div id="edit-orig-ko" style="font-size:16px;line-height:1.5;color:var(--text);background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px"></div>
-      <div class="label">수정 후 번역</div>
-      <textarea id="edit-new-ko" rows="3" style="resize:none;font-size:18px"></textarea>
-
+      <div style="font-size:16px;font-weight:700;color:var(--accent);margin-bottom:12px" id="edit-field-title"></div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:6px">수정 전</div>
+      <div id="edit-orig-val" style="font-size:16px;line-height:1.5;color:var(--text);background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px"></div>
+      <div class="label">수정 후</div>
+      <textarea id="edit-new-val" rows="3" style="resize:none;font-size:18px"></textarea>
       <div class="row" style="margin-top:8px">
-        <button class="btn btn-muted flex1" onclick="cancelEdit()">취소</button>
+        <button class="btn btn-muted flex1" onclick="backToFieldSelect()">← 항목 선택</button>
         <button class="btn btn-green flex1" onclick="saveEdit()">저장</button>
       </div>
       <div id="edit-status" style="font-size:14px;margin-top:8px;text-align:center"></div>
@@ -1404,20 +1409,37 @@ function renderStats() {
 }
 
 // ── 수정 탭 (운영자 전용) ─────────────────────────────────
+const EDIT_FIELDS = [
+  {key:'en',    label:'영어표현'},
+  {key:'ko',    label:'우리말표현'},
+  {key:'pr',    label:'발음'},
+  {key:'ex_en', label:'예문 (영어)'},
+  {key:'ex_ko', label:'번역 (한국어)'},
+  {key:'syn',   label:'동의어'},
+  {key:'ant',   label:'반의어'},
+  {key:'src',   label:'출처'},
+  {key:'nar',   label:'나레이션'},
+];
+let editingField = null;
+
 function adminSearch() {
   const q = document.getElementById("admin-search").value.trim().toLowerCase();
   if (!q) return;
   const results = words.filter(w=>
-    w.ex_en.toLowerCase().includes(q) || w.ex_ko.includes(q)
+    w.en.toLowerCase().includes(q) ||
+    w.ex_en.toLowerCase().includes(q) ||
+    w.ex_ko.includes(q) ||
+    (w.ko && w.ko.includes(q))
   );
   document.getElementById("admin-results").style.display="block";
+  document.getElementById("admin-field-select").style.display="none";
   document.getElementById("admin-edit").style.display="none";
   if (results.length===0) {
     document.getElementById("admin-result-list").innerHTML=
       `<div class="card" style="text-align:center;color:var(--muted)">검색 결과 없음</div>`;
     return;
   }
-  document.getElementById("admin-result-list").innerHTML=results.slice(0,20).map((w,i)=>`
+  document.getElementById("admin-result-list").innerHTML=results.slice(0,20).map(w=>`
     <div class="card" style="cursor:pointer;padding:12px 14px" onclick="selectEditWord('${w.id}')">
       <div style="font-size:15px;font-weight:700;color:var(--accent);margin-bottom:4px">${w.en}</div>
       <div style="font-size:14px;color:var(--text);line-height:1.4">${w.ex_en}</div>
@@ -1429,27 +1451,52 @@ function selectEditWord(id) {
   editingWord = words.find(w=>w.id===id);
   if (!editingWord) return;
   document.getElementById("admin-results").style.display="none";
+  document.getElementById("admin-edit").style.display="none";
+  document.getElementById("admin-field-select").style.display="block";
+  document.getElementById("edit-word-title").textContent = editingWord.en + (editingWord.ko ? ' · ' + editingWord.ko : '');
+
+  // 항목 버튼 생성 (값이 있는 항목은 미리보기 표시)
+  document.getElementById("field-btn-list").innerHTML = EDIT_FIELDS.map(f => {
+    const val = editingWord[f.key] || '';
+    const preview = val ? `<span style="font-size:13px;color:var(--muted);margin-left:8px">${val.slice(0,20)}${val.length>20?'...':''}</span>` : '';
+    return `<div class="card" style="cursor:pointer;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between"
+      onclick="selectEditField('${f.key}')">
+      <span style="font-weight:700;color:var(--accent)">${f.label}</span>
+      ${preview}
+    </div>`;
+  }).join("");
+}
+
+function selectEditField(fieldKey) {
+  const field = EDIT_FIELDS.find(f=>f.key===fieldKey);
+  if (!field || !editingWord) return;
+  editingField = fieldKey;
+  document.getElementById("admin-field-select").style.display="none";
   document.getElementById("admin-edit").style.display="block";
-  document.getElementById("edit-orig-en").textContent = editingWord.ex_en;
-  document.getElementById("edit-new-en").value = editingWord.ex_en;
-  document.getElementById("edit-orig-ko").textContent = editingWord.ex_ko;
-  document.getElementById("edit-new-ko").value = editingWord.ex_ko;
+  document.getElementById("edit-field-title").textContent = `✏️ ${field.label} 수정`;
+  document.getElementById("edit-orig-val").textContent = editingWord[fieldKey] || '(비어있음)';
+  document.getElementById("edit-new-val").value = editingWord[fieldKey] || '';
   document.getElementById("edit-status").textContent="";
 }
 
-function cancelEdit() {
-  editingWord=null;
+function backToFieldSelect() {
+  editingField = null;
   document.getElementById("admin-edit").style.display="none";
+  document.getElementById("admin-field-select").style.display="block";
+}
+
+function cancelEdit() {
+  editingWord = null;
+  editingField = null;
+  document.getElementById("admin-edit").style.display="none";
+  document.getElementById("admin-field-select").style.display="none";
   document.getElementById("admin-results").style.display="none";
   document.getElementById("admin-search").value="";
 }
 
 async function saveEdit() {
-  if (!editingWord) return;
-  const newEnEx = document.getElementById("edit-new-en").value.trim();
-  const newKoEx = document.getElementById("edit-new-ko").value.trim();
-  if (!newEnEx || !newKoEx) { alert("내용을 입력해주세요."); return; }
-
+  if (!editingWord || !editingField) return;
+  const newVal = document.getElementById("edit-new-val").value.trim();
   document.getElementById("edit-status").textContent="저장 중...";
   document.getElementById("edit-status").style.color="var(--yellow)";
 
@@ -1459,18 +1506,21 @@ async function saveEdit() {
         action:"updateWord",
         author,
         wordId: editingWord.id,
-        ex_en: newEnEx,
-        ex_ko: newKoEx,
+        field: editingField,
+        value: newVal,
       })
     });
     const data = await res.json();
     if (data.success) {
       // 로컬 업데이트
       const idx = words.findIndex(w=>w.id===editingWord.id);
-      if (idx>=0) { words[idx].ex_en=newEnEx; words[idx].ex_ko=newKoEx; }
+      if (idx>=0) {
+        words[idx][editingField] = newVal;
+        editingWord[editingField] = newVal;
+      }
       document.getElementById("edit-status").textContent="✅ 저장 완료!";
       document.getElementById("edit-status").style.color="var(--green)";
-      setTimeout(()=>cancelEdit(), 1500);
+      setTimeout(()=>backToFieldSelect(), 1500);
     } else {
       document.getElementById("edit-status").textContent="❌ 저장 실패";
       document.getElementById("edit-status").style.color="var(--red)";
