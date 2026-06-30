@@ -173,19 +173,7 @@ input:focus, textarea:focus { border-color: var(--accent); }
   <div class="card" id="login-card">
     <div style="font-size:18px;font-weight:700;color:var(--yellow);margin-bottom:16px">🔐 로그인</div>
     <div class="label">이름 선택</div>
-    <!-- 이름 목록 (커스텀) -->
-    <div id="name-list-wrap" style="display:none;margin-bottom:10px">
-      <div id="name-list" style="max-height:260px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;background:#fff"></div>
-    </div>
-    <!-- 선택된 이름 표시 -->
-    <div id="name-selected-display" onclick="toggleNameList()"
-      style="width:100%;background:#fff;border:1px solid var(--border);
-      border-radius:10px;color:var(--text);font-size:20px;
-      padding:12px 14px;margin-bottom:10px;cursor:pointer;
-      display:flex;justify-content:space-between;align-items:center">
-      <span id="name-selected-text" style="color:var(--dim)">이름을 선택하세요...</span>
-      <span style="color:var(--muted)">▼</span>
-    </div>
+    <div id="name-list" style="max-height:280px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;background:#fff;margin-bottom:10px"></div>
     <input type="hidden" id="login-name-select" value="">
     <div id="new-name-row" style="display:none">
       <div class="label">이름 직접 입력</div>
@@ -647,6 +635,7 @@ function populateNameSelect(userList) {
   sorted.forEach(u => {
     const div = document.createElement("div");
     div.textContent = u;
+    div.dataset.value = u;
     div.style.cssText = "padding:14px 16px;font-size:20px;border-bottom:1px solid var(--border);cursor:pointer;background:#fff";
     div.addEventListener("click", () => selectName(u));
     list.appendChild(div);
@@ -654,36 +643,31 @@ function populateNameSelect(userList) {
 
   const newDiv = document.createElement("div");
   newDiv.textContent = "✨ 신규 참여";
+  newDiv.dataset.value = "__new__";
   newDiv.style.cssText = "padding:14px 16px;font-size:20px;cursor:pointer;background:#fff;color:var(--accent);font-weight:700";
   newDiv.addEventListener("click", () => selectName("__new__"));
   list.appendChild(newDiv);
 }
 
-function toggleNameList() {
-  const wrap = document.getElementById("name-list-wrap");
-  const isOpen = wrap.style.display !== "none";
-  wrap.style.display = isOpen ? "none" : "block";
-}
-
 function selectName(value) {
   document.getElementById("login-name-select").value = value;
-  document.getElementById("name-list-wrap").style.display = "none";
+  // 선택된 항목 하이라이트
+  document.querySelectorAll("#name-list div").forEach(d => {
+    d.style.background = d.dataset.value === value ? "var(--accent-g)" : "#fff";
+    d.style.fontWeight = d.dataset.value === value ? "700" : "400";
+  });
   const newRow = document.getElementById("new-name-row");
-  const displayText = document.getElementById("name-selected-text");
   if (value === "__new__") {
-    displayText.textContent = "✨ 신규 참여";
-    displayText.style.color = "var(--accent)";
     newRow.style.display = "block";
     document.getElementById("login-name-input").focus();
   } else {
-    displayText.textContent = value;
-    displayText.style.color = "var(--text)";
     newRow.style.display = "none";
     document.getElementById("login-pw").focus();
   }
   document.getElementById("login-error").style.display = "none";
 }
 
+function toggleNameList() {} // 하위 호환용 빈 함수
 function onNameSelect() {} // 하위 호환용 빈 함수
 
 async function verifyLogin(name, pw) {
@@ -765,9 +749,10 @@ function doLogout() {
   document.getElementById("login-error").style.display = "none";
   document.getElementById("new-name-row").style.display = "none";
   document.getElementById("login-name-select").value = "";
-  document.getElementById("name-selected-text").textContent = "이름을 선택하세요...";
-  document.getElementById("name-selected-text").style.color = "var(--dim)";
-  document.getElementById("name-list-wrap").style.display = "none";
+  document.querySelectorAll("#name-list div").forEach(d => {
+    d.style.background = "#fff";
+    d.style.fontWeight = "400";
+  });
   showLogin();
   goHome();
   showLoginScreen();
