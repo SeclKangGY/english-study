@@ -259,7 +259,23 @@ input:focus, textarea:focus { border-color: var(--accent); }
   </div>
 </div>
 
-<!-- ── 탭: 입력 ── -->
+<!-- 신규 참여자 운영자 표현 받기 팝업 -->
+<div id="admin-words-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:999;justify-content:center;align-items:center;padding:20px">
+  <div style="background:var(--card);border:2px solid var(--accent);border-radius:20px;padding:22px;max-width:420px;width:100%">
+    <div style="font-size:20px;font-weight:800;color:var(--accent);margin-bottom:12px">📚 운영자 표현 받기</div>
+    <div style="font-size:16px;line-height:1.7;color:var(--text);margin-bottom:20px">
+      신규 참여자는 운영자로부터 영어표현 50개를 받아 테스트할 수 있습니다. 받아보시겠습니까?<br>
+      <span style="font-size:14px;color:var(--muted)">받은 표현은 설정에서 언제든지 삭제할 수 있습니다.</span>
+    </div>
+    <div class="row">
+      <button class="btn btn-accent flex1" onclick="acceptAdminWords()">예</button>
+      <button class="btn btn-muted flex1" onclick="closeAdminWordsModal()">아니요</button>
+    </div>
+    <div id="admin-words-status" style="font-size:14px;margin-top:10px;text-align:center;display:none"></div>
+  </div>
+</div>
+
+
 <div id="tab-input" class="tab-section body">
   <div class="card">
     <div style="font-size:18px;font-weight:700;color:var(--yellow);margin-bottom:14px">✏️ 새 표현 등록</div>
@@ -521,6 +537,12 @@ input:focus, textarea:focus { border-color: var(--accent); }
     <div id="pw-status" style="font-size:14px;margin-top:8px;text-align:center;display:none"></div>
   </div>
   <div class="card" style="margin-top:10px">
+    <div style="font-size:18px;font-weight:700;color:var(--accent);margin-bottom:12px">📚 운영자 표현</div>
+    <button class="btn btn-green btn-full" style="margin-bottom:10px" onclick="showAdminWordsModal()">운영자 표현 가져오기 (50개)</button>
+    <button class="btn btn-red btn-full" onclick="confirmDeleteAdminWords()">운영자 표현(50개) 삭제</button>
+    <div id="admin-words-setting-status" style="font-size:14px;margin-top:8px;text-align:center;display:none"></div>
+  </div>
+  <div class="card" style="margin-top:10px">
     <div style="font-size:16px;font-weight:700;color:var(--muted);margin-bottom:12px">계정</div>
     <div style="font-size:15px;color:var(--text);margin-bottom:12px">
       현재 사용자: <span id="current-user-display3" style="color:var(--accent);font-weight:700"></span>
@@ -685,7 +707,9 @@ async function doRegister() {
       // 사용자 목록에 추가
       if (!users.includes(name)) { users.push(name); populateNameSelect(users); }
       document.getElementById("login-screen").classList.remove("show");
-      startApp();
+      await startApp();
+      // 신규 등록 시 운영자 표현 받기 팝업
+      setTimeout(()=>showAdminWordsModal(), 500);
     } else {
       showRegError(data.error || "등록 실패");
     }
@@ -1558,6 +1582,66 @@ async function saveEdit() {
   } catch(e) {
     document.getElementById("edit-status").textContent="❌ 네트워크 오류";
     document.getElementById("edit-status").style.color="var(--red)";
+  }
+}
+
+// ── 운영자 표현 받기 ──────────────────────────────────────
+function showAdminWordsModal() {
+  const modal = document.getElementById("admin-words-modal");
+  modal.style.display = "flex";
+  document.getElementById("admin-words-status").style.display = "none";
+  document.getElementById("admin-words-setting-status").style.display = "none";
+}
+
+function closeAdminWordsModal() {
+  document.getElementById("admin-words-modal").style.display = "none";
+}
+
+async function acceptAdminWords() {
+  const statusEl = document.getElementById("admin-words-status");
+  statusEl.style.display = "block";
+  statusEl.style.color = "var(--yellow)";
+  statusEl.textContent = "가져오는 중...";
+  try {
+    const res = await fetch(API, { method:"POST",
+      body: JSON.stringify({ action:"copyAdminWords", name:author }) });
+    const data = await res.json();
+    if (data.success) {
+      statusEl.style.color = "var(--green)";
+      statusEl.textContent = "✅ 50개 표현을 가져왔습니다!";
+      await loadData();
+      setTimeout(()=>closeAdminWordsModal(), 1500);
+    } else {
+      statusEl.style.color = "var(--red)";
+      statusEl.textContent = "❌ " + (data.error || "실패");
+    }
+  } catch(e) {
+    statusEl.style.color = "var(--red)";
+    statusEl.textContent = "❌ 네트워크 오류";
+  }
+}
+
+async function confirmDeleteAdminWords() {
+  if (!confirm("운영자로부터 받은 표현 50개를 삭제하시겠습니까?")) return;
+  const statusEl = document.getElementById("admin-words-setting-status");
+  statusEl.style.display = "block";
+  statusEl.style.color = "var(--yellow)";
+  statusEl.textContent = "삭제 중...";
+  try {
+    const res = await fetch(API, { method:"POST",
+      body: JSON.stringify({ action:"deleteAdminWords", name:author }) });
+    const data = await res.json();
+    if (data.success) {
+      statusEl.style.color = "var(--green)";
+      statusEl.textContent = "✅ 운영자 표현이 삭제되었습니다.";
+      await loadData();
+    } else {
+      statusEl.style.color = "var(--red)";
+      statusEl.textContent = "❌ " + (data.error || "실패");
+    }
+  } catch(e) {
+    statusEl.style.color = "var(--red)";
+    statusEl.textContent = "❌ 네트워크 오류";
   }
 }
 
