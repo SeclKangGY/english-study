@@ -642,15 +642,21 @@ async function showLoginScreen() {
 function populateNameSelect(userList) {
   const sorted = [...userList].sort((a, b) => a.localeCompare(b, 'ko'));
   const list = document.getElementById("name-list");
-  list.innerHTML = sorted.map(u => `
-    <div onclick="selectName('${u}')"
-      style="padding:14px 16px;font-size:20px;border-bottom:1px solid var(--border);cursor:pointer;background:#fff">
-      ${u}
-    </div>`).join("") + `
-    <div onclick="selectName('__new__')"
-      style="padding:14px 16px;font-size:20px;cursor:pointer;background:#fff;color:var(--accent);font-weight:700">
-      ✨ 신규 참여
-    </div>`;
+  list.innerHTML = "";
+
+  sorted.forEach(u => {
+    const div = document.createElement("div");
+    div.textContent = u;
+    div.style.cssText = "padding:14px 16px;font-size:20px;border-bottom:1px solid var(--border);cursor:pointer;background:#fff";
+    div.addEventListener("click", () => selectName(u));
+    list.appendChild(div);
+  });
+
+  const newDiv = document.createElement("div");
+  newDiv.textContent = "✨ 신규 참여";
+  newDiv.style.cssText = "padding:14px 16px;font-size:20px;cursor:pointer;background:#fff;color:var(--accent);font-weight:700";
+  newDiv.addEventListener("click", () => selectName("__new__"));
+  list.appendChild(newDiv);
 }
 
 function toggleNameList() {
