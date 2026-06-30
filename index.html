@@ -498,6 +498,12 @@ input:focus, textarea:focus { border-color: var(--accent); }
     <button class="btn btn-green btn-full" onclick="saveSettings()">설정 저장</button>
   </div>
   <div class="card">
+    <div style="font-size:18px;font-weight:700;color:var(--accent);margin-bottom:12px">👥 사용자 동기화</div>
+    <div style="font-size:14px;color:var(--muted);margin-bottom:12px">DB 시트 기준으로 사용자 시트에 없는 팀원을 자동 등록합니다.</div>
+    <button class="btn btn-accent btn-full" onclick="syncUsersManual()">사용자 동기화 실행</button>
+    <div id="sync-status" style="font-size:14px;margin-top:8px;text-align:center;display:none"></div>
+  </div>
+  <div class="card">
     <div style="font-size:18px;font-weight:700;color:var(--accent);margin-bottom:12px">📊 시험통계 시트 생성</div>
     <div style="font-size:14px;color:var(--muted);margin-bottom:12px">DB 시트가 있는 팀원 중 시험통계 시트가 없는 경우 자동 생성합니다.</div>
     <button class="btn btn-accent btn-full" onclick="createMissingStatSheets()">시험통계 시트 일괄 생성</button>
@@ -783,7 +789,7 @@ async function startApp() {
   goHome();
   // 운영자면 loadData 완료 후 백그라운드로 syncUsers 실행
   if (author === ADMIN) {
-    try { fetch(`${API}?action=syncUsers`); } catch(e) {}
+    // syncUsers는 관리자 탭 버튼으로만 실행 (자동 실행 제거)
   }
 }
 
@@ -1659,6 +1665,27 @@ async function confirmDeleteAdminWords() {
     } else {
       statusEl.style.color = "var(--red)";
       statusEl.textContent = "❌ " + (data.error || "실패");
+    }
+  } catch(e) {
+    statusEl.style.color = "var(--red)";
+    statusEl.textContent = "❌ 네트워크 오류";
+  }
+}
+
+async function syncUsersManual() {
+  const statusEl = document.getElementById("sync-status");
+  statusEl.style.display = "block";
+  statusEl.style.color = "var(--yellow)";
+  statusEl.textContent = "동기화 중...";
+  try {
+    const res = await fetch(`${API}?action=syncUsers`);
+    const data = await res.json();
+    if (data.success) {
+      statusEl.style.color = "var(--green)";
+      statusEl.textContent = "✅ 동기화 완료!";
+    } else {
+      statusEl.style.color = "var(--red)";
+      statusEl.textContent = "❌ 실패";
     }
   } catch(e) {
     statusEl.style.color = "var(--red)";
