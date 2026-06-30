@@ -727,6 +727,7 @@ function doLogout() {
   document.getElementById("login-pw").value = "";
   document.getElementById("login-error").style.display = "none";
   document.getElementById("new-name-row").style.display = "none";
+  document.getElementById("login-name-select").value = "";
   showLogin();
   goHome();
   showLoginScreen();
@@ -751,12 +752,8 @@ function showRegError(msg) {
 
 // ── 앱 시작 ───────────────────────────────────────────────
 async function startApp() {
-  // 운영자면 설정탭 표시 + 빈 비번 자동 초기화
   if (author === ADMIN) {
     document.getElementById("settings-tab-btn").style.display="flex";
-    try {
-      fetch(`${API}?action=syncUsers`); // 백그라운드 실행
-    } catch(e) {}
   }
   ['current-user-display','current-user-display2','current-user-display3'].forEach(id=>{
     const el = document.getElementById(id); if(el) el.textContent = author;
@@ -764,6 +761,10 @@ async function startApp() {
   await loadData();
   selectTab('exam');
   goHome();
+  // 운영자면 loadData 완료 후 백그라운드로 syncUsers 실행
+  if (author === ADMIN) {
+    try { fetch(`${API}?action=syncUsers`); } catch(e) {}
+  }
 }
 
 // ── 데이터 로드 ───────────────────────────────────────────
