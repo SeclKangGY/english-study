@@ -1637,7 +1637,7 @@ async function acceptAdminWords() {
       statusEl.style.color = "var(--green)";
       statusEl.textContent = "✅ 50개 표현을 가져왔습니다!";
       await loadData();
-      setTimeout(()=>closeAdminWordsModal(), 1500);
+      setTimeout(()=>closeAdminWordsModal(), 500);
     } else {
       statusEl.style.color = "var(--red)";
       statusEl.textContent = "❌ " + (data.error || "실패");
