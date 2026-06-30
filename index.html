@@ -615,8 +615,12 @@ async function initLogin() {
 
 async function showLoginScreen() {
   document.getElementById("login-screen").classList.add("show");
-  // 캐시된 목록으로 먼저 채우기
-  if (users.length > 0) populateNameSelect(users);
+  // 캐시된 목록이 있으면 API 재호출 없이 바로 채우기
+  if (users.length > 0) {
+    populateNameSelect(users);
+    return;
+  }
+  // 처음 접속 시만 API 호출
   try {
     const res = await fetch(`${API}?action=getUsers`);
     const data = await res.json();
