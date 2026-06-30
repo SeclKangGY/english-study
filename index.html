@@ -627,6 +627,8 @@ async function showLoginScreen() {
   } catch(e) {}
 }
 
+let selectedLoginName = "";
+
 function populateNameSelect(userList) {
   const sorted = [...userList].sort((a, b) => a.localeCompare(b, 'ko'));
   const list = document.getElementById("name-list");
@@ -650,11 +652,13 @@ function populateNameSelect(userList) {
 }
 
 function selectName(value) {
+  selectedLoginName = value;
   document.getElementById("login-name-select").value = value;
   // 선택된 항목 하이라이트
   document.querySelectorAll("#name-list div").forEach(d => {
     d.style.background = d.dataset.value === value ? "var(--accent-g)" : "#fff";
-    d.style.fontWeight = d.dataset.value === value ? "700" : "400";
+    d.style.color = d.dataset.value === value ? "var(--accent)" : (d.dataset.value === "__new__" ? "var(--accent)" : "var(--text)");
+    d.style.fontWeight = d.dataset.value === value ? "700" : (d.dataset.value === "__new__" ? "700" : "400");
   });
   const newRow = document.getElementById("new-name-row");
   if (value === "__new__") {
@@ -667,8 +671,8 @@ function selectName(value) {
   document.getElementById("login-error").style.display = "none";
 }
 
-function toggleNameList() {} // 하위 호환용 빈 함수
-function onNameSelect() {} // 하위 호환용 빈 함수
+function toggleNameList() {}
+function onNameSelect() {}
 
 async function verifyLogin(name, pw) {
   try {
@@ -679,12 +683,10 @@ async function verifyLogin(name, pw) {
 }
 
 async function doLogin() {
-  const sel = document.getElementById("login-name-select");
-  let name = sel.value;
+  let name = selectedLoginName;
   if (name === "__new__") {
     name = document.getElementById("login-name-input").value.trim();
     if (!name) { showLoginError("이름을 입력해주세요."); return; }
-    // 신규 참여 → 등록 화면으로 이동 (이름 미리 채워줌)
     document.getElementById("reg-name").value = name;
     showRegister();
     return;
@@ -696,9 +698,7 @@ async function doLogin() {
   try {
     const res = await fetch(`${API}?action=verifyLogin&name=${encodeURIComponent(name)}&pw=${encodeURIComponent(pw)}`);
     const data = await res.json();
-    
     if (!data.valid) { showLoginError("이름 또는 비밀번호가 틀렸습니다."); return; }
-
     localStorage.setItem('loginInfo', JSON.stringify({author:name, pw:pw}));
     author = name;
     document.getElementById("login-screen").classList.remove("show");
@@ -749,9 +749,10 @@ function doLogout() {
   document.getElementById("login-error").style.display = "none";
   document.getElementById("new-name-row").style.display = "none";
   document.getElementById("login-name-select").value = "";
+  selectedLoginName = "";
   document.querySelectorAll("#name-list div").forEach(d => {
     d.style.background = "#fff";
-    d.style.fontWeight = "400";
+    d.style.fontWeight = d.dataset.value === "__new__" ? "700" : "400";
   });
   showLogin();
   goHome();
