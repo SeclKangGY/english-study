@@ -600,7 +600,13 @@ async function initLogin() {
   if (saved.author && saved.pw) {
     try {
       author = saved.author;
-      await startApp();
+      // getUsers와 startApp 병렬 실행
+      await Promise.all([
+        fetch(`${API}?action=getUsers`).then(r=>r.json()).then(d=>{
+          if(d.users){users=d.users;}
+        }).catch(()=>{}),
+        startApp()
+      ]);
       return;
     } catch(e) {
       console.log('자동 로그인 실패:', e);
